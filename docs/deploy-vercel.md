@@ -2,9 +2,9 @@
 
 ## O que vai para a Vercel
 
-O portal usa Django e o runtime Python nativo da Vercel. O deploy detecta o projeto pelo arquivo manage.py e pelo requirements.txt; não precisa de vercel.json, Dockerfile ou comando de build personalizado. O arquivo .python-version mantém a mesma versão Python 3.13 usada pela imagem local. A Vercel executa a coleta dos arquivos estáticos porque o projeto define STATIC_ROOT.
+O portal usa Django e o runtime Python nativo da Vercel. O deploy detecta o projeto pelo arquivo manage.py e pelo requirements.txt; não precisa de vercel.json, Dockerfile ou comando de build personalizado. As regras do Ruff ficam em ruff.toml, separado do manifesto de dependências. O arquivo .python-version mantém a mesma versão Python 3.13 usada pela imagem local. A Vercel executa a coleta dos arquivos estáticos porque o projeto define STATIC_ROOT.
 
-Conecte o repositório Vitor-Studzieski/busca-preco com o diretório raiz padrão. Configure as variáveis abaixo antes do primeiro deploy; o modo de produção exige essas configurações também durante a build.
+Conecte o repositório Vitor-Studzieski/busca-preco com o diretório raiz padrão. Como DEBUG fica desativado na Vercel, as variáveis obrigatórias precisam existir durante cada build em Preview e Production. Defina DJANGO_SECRET_KEY, PRICING_ADMIN_PATH, DATABASE_URL e PRICING_REDIS_URL para cada ambiente usado. Mantenha banco e Redis de Preview isolados dos dados de Production.
 
 ## Variáveis de ambiente
 

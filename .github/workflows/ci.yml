@@ -28,6 +28,25 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
+      - name: Check Vercel Python manifest
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          import tomllib
+
+          pyproject = Path("pyproject.toml")
+          if pyproject.exists():
+              dependencies = tomllib.loads(pyproject.read_text()).get("project", {}).get("dependencies", [])
+          else:
+              dependencies = Path("requirements.txt").read_text().splitlines()
+          has_django = any(
+              re.match(r"^django(?:\[.*?\])?\s*(?:==|~=|>=|<=|!=|===|<|>)", dependency.strip(), re.I)
+              for dependency in dependencies
+          )
+          if not has_django:
+              raise SystemExit("Vercel dependency manifest must declare Django in pyproject.toml or requirements.txt")
+          PY
       - run: pip install --require-hashes -r requirements.txt
       - run: pip install 'ruff==0.17.6' 'bandit==1.9.4' 'pip-audit==2.10.1' 'coverage==7.13.4'
       - run: ruff check .
