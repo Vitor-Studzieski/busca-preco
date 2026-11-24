@@ -25,6 +25,13 @@ class WorkflowTests(TestCase):
         self.client.force_login(self.user)
         self.store = Store.objects.get(slug="lider-pompeia")
 
+    def test_buyer_can_render_all_operational_pages(self):
+        for name in ("pricing:search", "pricing:day_queue", "pricing:alerts", "pricing:health", "buyer_devices"):
+            with self.subTest(name=name):
+                response = self.client.get(reverse(name))
+                self.assertEqual(response.status_code, 200)
+                self.assertIn("no-store", response["Cache-Control"])
+
     def test_shared_queue_and_account_bound_progress(self):
         path = reverse("pricing:refresh")
         response = self.client.post(path, {"q": "Detergente 500 ml"})

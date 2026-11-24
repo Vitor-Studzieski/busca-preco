@@ -19,13 +19,32 @@
   },
   "coleta": {
     "fusohorario": "America/Sao_Paulo",
-    "horas_padrao": [4, 14],
+    "horas_padrao": [
+      4,
+      14
+    ],
     "configuracao": "PRICING_COLLECTION_HOURS, duas horas distintas em formato 4,14",
     "fontes": [
-      {"rede": "Super Líder", "unidade": "Pompéia", "slug": "lider-pompeia"},
-      {"rede": "Super Líder", "unidade": "Herculândia", "slug": "lider-herculandia"},
-      {"rede": "Tauste", "unidade": "Marília", "slug": "tauste-marilia"},
-      {"rede": "Confiança", "unidade": "Marília", "slug": "confianca-marilia"}
+      {
+        "rede": "Super Líder",
+        "unidade": "Pompéia",
+        "slug": "lider-pompeia"
+      },
+      {
+        "rede": "Super Líder",
+        "unidade": "Herculândia",
+        "slug": "lider-herculandia"
+      },
+      {
+        "rede": "Tauste",
+        "unidade": "Marília",
+        "slug": "tauste-marilia"
+      },
+      {
+        "rede": "Confiança",
+        "unidade": "Marília",
+        "slug": "confianca-marilia"
+      }
     ],
     "origem_das_pesquisas_monitoradas": "Consultas reais com oferta observada, registradas no banco. Anúncios ativos já vinculados também são processados.",
     "retomada": "O worker recupera o último horário vencido do dia e usa chave única de execução por janela.",
@@ -41,18 +60,52 @@
     "isolamento_frontend": "O request GET da pesquisa consulta somente o banco. A atualização é enfileirada via POST e acompanhada por polling autenticado."
   },
   "modelo": {
-    "cadastro_original": ["Product", "Store", "Listing", "Observation", "PriceDraft", "InitialAccountSetup"],
-    "fila_e_agenda": ["CollectionRun", "CollectionJob", "NetworkHealth", "MonitoredQuery"],
-    "acesso_e_auditoria": ["BuyerDevice", "RateWindow", "AuditLog"],
-    "preco_proprio_e_alertas": ["OwnPrice", "DayItem", "Alert", "AlertRule", "AlertAcknowledgment", "SearchAlias"],
+    "cadastro_original": [
+      "Product",
+      "Store",
+      "Listing",
+      "Observation",
+      "PriceDraft",
+      "InitialAccountSetup"
+    ],
+    "fila_e_agenda": [
+      "CollectionRun",
+      "CollectionJob",
+      "NetworkHealth",
+      "MonitoredQuery"
+    ],
+    "acesso_e_auditoria": [
+      "BuyerDevice",
+      "RateWindow",
+      "AuditLog"
+    ],
+    "preco_proprio_e_alertas": [
+      "OwnPrice",
+      "DayItem",
+      "Alert",
+      "AlertRule",
+      "AlertAcknowledgment",
+      "SearchAlias"
+    ],
     "integridade_postgresql": "Vigências do mesmo tipo não podem se sobrepor. Auditoria é append-only. Observações não são removidas em cascata pelo anúncio.",
-    "migrations": ["0006_fluxo_comprador", "0007_integridade_postgres", "0008_limites_compartilhados", "0009_origem_do_produto", "0010_pre_coleta_de_pesquisas", "0011_busca_cacheada"],
+    "migrations": [
+      "0006_fluxo_comprador",
+      "0007_integridade_postgres",
+      "0008_limites_compartilhados",
+      "0009_origem_do_produto",
+      "0010_pre_coleta_de_pesquisas",
+      "0011_busca_cacheada"
+    ],
     "transferencia": "Comando migrate_catalog_database com cópia SQLite, contagem e checksum antes/depois. Rodar em PostgreSQL destino vazio."
   },
   "controle_de_acesso": {
     "compradores": "Provisionamento por comando create_buyer e limite de duas contas compradoras na configuração de produção",
     "persistencia": "30 dias de inatividade com renovação por uso, opção de manter conectado marcada inicialmente",
-    "cookies_producao": ["HttpOnly", "Secure", "SameSite=Lax"],
+    "cookies_producao": [
+      "HttpOnly",
+      "Secure",
+      "SameSite=Lax"
+    ],
     "senha": "Argon2 e integração com gerenciador do navegador",
     "protecao": "CSRF, rate limiting, sessão mantida no servidor, revogação de outras sessões e CSP",
     "restricao_de_rede": "Allowlist por CIDR implementada no proxy de exemplo. Hostname, TLS e rede do escritório precisam ser configurados no servidor real."
@@ -60,14 +113,36 @@
   "evidencias": {
     "buscas_reais_por_versao": 30,
     "original_p50_segundos": 11.37,
-    "original_p95_segundos": 13.50,
+    "original_p95_segundos": 13.5,
     "nova_leitura_p95_ms": 14,
     "nova_leitura_com_dados_p95_ms": 6,
-    "primeira_oferta_confirmada_p50_segundos": 4.30,
+    "primeira_oferta_confirmada_p50_segundos": 4.3,
     "atualizacao_ao_vivo_p95_segundos": 16.58,
     "tests_baseline": 55,
-    "transferencia_sqlite_postgres": {"registros_validados": 6, "metodo": "Contagem e SHA-256"},
-    "documentos": ["auditoria.md", "baseline-desempenho.md", "seguranca.md", "runbook.md", "perguntas-em-aberto.md"]
+    "transferencia_sqlite_postgres": {
+      "registros_validados": 6,
+      "metodo": "Contagem e SHA-256"
+    },
+    "documentos": [
+      "auditoria.md",
+      "baseline-desempenho.md",
+      "seguranca.md",
+      "runbook.md",
+      "perguntas-em-aberto.md",
+      "entrega.md"
+    ],
+    "tests_postgresql": 64,
+    "tests_sqlite": {
+      "total": 64,
+      "ignorados": 1
+    },
+    "verificacao_estatica": [
+      "ruff",
+      "bandit",
+      "pip-audit",
+      "check --deploy",
+      "docker compose config"
+    ]
   },
   "pendencias": [
     "Definir conexão, catálogo e frequência do banco do Pompeia",

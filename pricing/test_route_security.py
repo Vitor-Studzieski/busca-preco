@@ -12,6 +12,7 @@ from django.urls import reverse
 from .collectors.http import (
     CollectionError,
     StorefrontRedirectHandler,
+    connect_public,
     fetch_html,
     storefront_deadline,
     validate_product_url,
@@ -154,6 +155,14 @@ class StorefrontRouteTests(SimpleTestCase):
             with self.assertRaises(CollectionError):
                 fetch_html(self.product, self.validate)
         response.read.assert_not_called()
+
+    def test_dns_resolution_rejects_internal_targets_before_socket_creation(self):
+        rows = [(2, 1, 6, "", ("127.0.0.1", 443))]
+        with patch("pricing.collectors.http.socket.getaddrinfo", return_value=rows), patch(
+            "pricing.collectors.http.socket.socket",
+        ) as create_socket, self.assertRaises(CollectionError):
+            connect_public(("www.smlider.com.br", 443), 1)
+        create_socket.assert_not_called()
 
     def test_transient_server_error_retries_once_without_retrying_access_refusal(self):
         for status, expected_calls in ((500, 2), (429, 1), (403, 1)):
