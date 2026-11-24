@@ -7,6 +7,7 @@ if (searchInput) {
     searchInput.focus();
   });
 
+  if (!searchInput.value && matchMedia("(min-width: 771px)").matches) searchInput.focus({preventScroll: true});
   const suggestions = document.getElementById('product-suggestions');
   let suggestionTimer;
   let pending;
@@ -55,7 +56,9 @@ if (liveForm) {
 
   function link(offer) {
     const anchor = element('a', offer.name);
-    const target = new URL(offer.url);
+    let target;
+    try { target = new URL(offer.url); }
+    catch { return element('span', offer.name); }
     if (target.protocol !== 'https:') return element('span', offer.name);
     anchor.href = target.href;
     anchor.target = '_blank';
@@ -63,39 +66,61 @@ if (liveForm) {
     return anchor;
   }
 
+  const filter = document.querySelector('[data-promotion-filter]');
+
+  function applyFilter(card) {
+    const list = card.querySelector('[data-offers]');
+    const offers = [...list.children];
+    for (const offer of offers) offer.hidden = filter.checked && !offer.hasAttribute('data-promotional');
+    card.querySelector('[data-filter-empty]').hidden = !filter.checked || !offers.length || offers.some((offer) => !offer.hidden);
+  }
+
   function show(row) {
     const card = cards.get(row.store);
     if (!card) return;
     const status = card.querySelector('[data-store-state]');
-    const parts = [row.label];
-    if (row.observed_at) parts.push(clock.format(new Date(row.observed_at)));
-    if (row.reason) parts.push(row.reason);
-    status.textContent = parts.join(' · ');
-    status.dataset.state = row.state;
+    const detail = card.querySelector('[data-store-detail]');
+    const date = card.querySelector('[data-store-time]');
     const list = card.querySelector('[data-offers]');
-    if (!row.offers?.length && !row.unpriced?.length) {
-      if (!['pending', 'running'].includes(row.state) && list.children.length) {
-        status.textContent += ' · Exibindo a última coleta confirmada';
+    const empty = card.querySelector('[data-empty]');
+    const inProgress = ['pending', 'running'].includes(row.state);
+    status.textContent = row.label;
+    status.dataset.state = row.state;
+    card.setAttribute('aria-busy', String(inProgress));
+    if (row.observed_at) date.textContent = clock.format(new Date(row.observed_at));
+    detail.textContent = row.reason || '';
+    if (row.offers?.length) {
+      list.replaceChildren();
+      for (const offer of row.offers) {
+        const item = element('li', '', 'offer-row');
+        if (offer.club || ['Promoção', 'Clube'].includes(offer.condition)) item.setAttribute('data-promotional', '');
+        const info = element('div', '', 'offer-copy');
+        info.append(link(offer), element('small', [offer.condition, offer.availability].join(' · ')));
+        const price = element('div', '', 'offer-price');
+        price.append(element('strong', currency.format(Number(offer.price)) + (offer.unit ? '/' + offer.unit : ''), 'money'));
+        if (offer.club) price.append(element('small', 'Clube · ' + currency.format(Number(offer.club))));
+        item.append(info, price);
+        list.append(item);
       }
-      return;
+    } else if (!inProgress && list.children.length) {
+      const note = 'Exibindo a última coleta confirmada.';
+      detail.textContent = detail.textContent ? detail.textContent + ' ' + note : note;
     }
-    list.replaceChildren();
-    for (const offer of row.offers || []) {
-      const item = element('li', '', 'market-offer');
-      const info = element('div');
-      info.append(link(offer), element('small', [offer.condition, offer.availability].join(' · ')));
-      const price = element('div', '', 'market-price');
-      price.append(element('strong', currency.format(Number(offer.price)) + (offer.unit ? '/' + offer.unit : ''), 'money'));
-      if (offer.club) price.append(element('small', 'Clube · ' + currency.format(Number(offer.club))));
-      item.append(info, price);
-      list.append(item);
+    if (row.unpriced?.length && !list.children.length) {
+      list.replaceChildren();
+      for (const offer of row.unpriced) {
+        const item = element('li', '', 'offer-row');
+        item.append(link(offer), element('small', 'Sem preço confirmado'));
+        list.append(item);
+      }
     }
-    for (const offer of row.unpriced || []) {
-      const item = element('li');
-      item.append(link(offer), element('small', 'Sem preço confirmado'));
-      list.append(item);
-    }
+    empty.hidden = Boolean(list.children.length);
+    empty.textContent = inProgress ? 'Consultando esta unidade…' :
+      row.state === 'missing' ? 'Tente buscar pela marca e pela embalagem.' : 'Nenhum preço confirmado nesta atualização.';
+    applyFilter(card);
   }
+
+  filter.addEventListener('change', () => cards.forEach(applyFilter));
 
   async function update(store) {
     const targets = store ? [store] : [...cards.keys()];
@@ -121,9 +146,8 @@ if (liveForm) {
       }
       const job = await response.json();
       const progress = new URL(liveForm.dataset.progress, location.origin);
-      progress.searchParams.set('token', job.token);
       for (let i = 0; i < 60; i += 1) {
-        const result = await fetch(progress);
+        const result = await fetch(progress, {headers: {'X-Collection-Ticket': job.token}});
         if (result.redirected) {
           location.assign(result.url);
           return;
@@ -155,4 +179,80 @@ if (liveForm) {
     button.addEventListener('click', () => update(Number(button.dataset.retry)));
   });
   if ([...cards.values()].some((card) => card.dataset.cached !== '1')) update(null);
+}
+
+const proposal = document.querySelector('[data-price-proposal]');
+if (proposal) {
+  const amountField = proposal.querySelector('#proposal-amount');
+  const output = proposal.querySelector('[data-proposal-preview]');
+  const sources = JSON.parse(document.getElementById('proposal-sources').textContent);
+  const money = new Intl.NumberFormat('pt-BR', {style: 'currency', currency: 'BRL'});
+  amountField.addEventListener('input', () => {
+    const entered = amountField.value.trim();
+    const amount = Number(entered.includes(',') ? entered.replaceAll('.', '').replace(',', '.') : entered);
+    output.hidden = !(amount > 0 && sources.length);
+    if (!output.hidden) {
+      output.textContent = sources.map((item) => {
+        const difference = Number(item.amount) - amount;
+        const percentage = (100 * difference / amount).toLocaleString('pt-BR', {maximumFractionDigits: 1});
+        return item.label + ' · ' + money.format(difference) + ' (' + percentage + '%)';
+      }).join('\n');
+    }
+  });
+}
+const chart = document.querySelector('[data-price-chart]');
+if (chart) {
+  const series = JSON.parse(document.getElementById('price-history-data').textContent);
+  const colors = ['#123d77', '#156a4b', '#913890', '#996319', '#ac3943'];
+  const points = series.flatMap((line) => line.points);
+  const times = points.map((point) => point[0]);
+  const amounts = points.map((point) => Number(point[1]));
+  const start = Math.min(...times), end = Math.max(...times);
+  const low = Math.min(...amounts), high = Math.max(...amounts);
+  const legend = document.createElement('ul');
+  legend.className = 'chart-legend';
+  series.forEach((line, index) => {
+    const item = document.createElement('li');
+    item.textContent = line.label;
+    item.dataset.series = index;
+    legend.append(item);
+  });
+  chart.after(legend);
+  const currency = new Intl.NumberFormat('pt-BR', {style: 'currency', currency: 'BRL'});
+  function draw() {
+    const width = chart.offsetWidth, height = chart.offsetHeight;
+    if (!width || !height) return;
+    chart.width = width * devicePixelRatio;
+    chart.height = height * devicePixelRatio;
+    const ctx = chart.getContext('2d');
+    ctx.scale(devicePixelRatio, devicePixelRatio);
+    ctx.font = '11px system-ui';
+    const bar = 79, right = 21, top = 19, bottom = 25;
+    ctx.strokeStyle = '#dde5ef';
+    ctx.fillStyle = '#52647a';
+    for (const [y, value] of [[top, high], [height-bottom, low]]) {
+      ctx.fillText(currency.format(value), 12, y+4);
+      ctx.beginPath();
+      ctx.moveTo(bar, y);
+      ctx.lineTo(width-right, y);
+      ctx.stroke();
+    }
+    series.forEach((line, index) => {
+      ctx.strokeStyle = ctx.fillStyle = colors[index % colors.length];
+      ctx.lineWidth = 2;
+      const positions = line.points.map(([time, amount]) => [
+        start === end ? width / 2 : bar + (time - start) * (width - right - bar) / (end - start),
+        low === high ? height / 2 : height - bottom - (amount - low) * (height - top - bottom) / (high - low),
+      ]);
+      ctx.beginPath();
+      positions.forEach(([x, y], i) => i ? ctx.lineTo(x,y) : ctx.moveTo(x,y));
+      ctx.stroke();
+      positions.forEach(([x, y]) => {
+        ctx.beginPath();
+        ctx.arc(x,y,3,0,Math.PI*2);
+        ctx.fill();
+      });
+    });
+  }
+  new ResizeObserver(draw).observe(chart);
 }

@@ -1,0 +1,27 @@
+<details class="panel link-review">
+  <summary>Revisar correspondências por unidade</summary>
+  <div>
+  {% for row in rows %}
+    {% if row.listing %}
+    <form method="post" action="{% url 'pricing:change_link' product.pk row.listing.pk %}" class="link-form">
+      {% csrf_token %}
+      <div><strong>{{ row.store }}</strong><small>{{ row.listing.name }} · {{ row.listing.get_match_method_display }}</small></div>
+      <label for="link-current-{{ row.listing.pk }}">Motivo</label>
+      <input id="link-current-{{ row.listing.pk }}" name="reason" maxlength="300" required>
+      <button class="secondary" type="submit" name="action" value="detach">Desfazer vínculo</button>
+    </form>
+    {% endif %}
+  {% endfor %}
+  {% for candidate in link_candidates %}
+    <form method="post" action="{% url 'pricing:change_link' product.pk candidate.pk %}" class="link-form">
+      {% csrf_token %}
+      <div><strong>{{ candidate.store }}</strong><small>{{ candidate.name }} · Mesmo GTIN</small></div>
+      <label for="link-candidate-{{ candidate.pk }}">Motivo</label>
+      <input id="link-candidate-{{ candidate.pk }}" name="reason" maxlength="300" required>
+      <button class="secondary" type="submit" name="action" value="confirm">Confirmar vínculo</button>
+    </form>
+  {% empty %}
+    <p class="muted">Nenhum outro anúncio com GTIN igual está disponível para revisar.</p>
+  {% endfor %}
+  </div>
+</details>

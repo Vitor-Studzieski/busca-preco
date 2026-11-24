@@ -40,10 +40,10 @@ class WorkflowTests(TestCase):
         self.assertEqual(CollectionJob.objects.count(), 4)
         progress = reverse("pricing:progress")
         token = response.json()["token"]
-        self.assertFalse(self.client.get(progress, {"token": token}).json()["complete"])
+        self.assertFalse(self.client.get(progress, HTTP_X_COLLECTION_TICKET=token).json()["complete"])
         second = get_user_model().objects.create_superuser("segunda")
         self.client.force_login(second)
-        self.assertEqual(self.client.get(progress, {"token": token}).status_code, 404)
+        self.assertEqual(self.client.get(progress, HTTP_X_COLLECTION_TICKET=token).status_code, 404)
 
     def test_live_success_persists_real_offer_before_scheduling_both_days(self):
         enqueue_search("Detergente 500 ml", store_id=self.store.pk)

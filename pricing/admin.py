@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .forms import ListingForm, ProductForm
+from .forms import AlertRuleForm, ListingForm, ProductForm, StoreForm
 from .models import Listing, PriceDraft, Product, Store
 from .workflow_models import AlertRule, SearchAlias
 
@@ -34,6 +34,7 @@ class ListingAdmin(admin.ModelAdmin):
 
 @admin.register(Store)
 class StoreAdmin(admin.ModelAdmin):
+    form = StoreForm
     list_display = ["retailer", "unit", "url"]
     readonly_fields = ["slug", "retailer", "unit", "url"]
 
@@ -56,5 +57,9 @@ class PriceDraftAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         return False
 
-admin.site.register(AlertRule)
+@admin.register(AlertRule)
+class AlertRuleAdmin(admin.ModelAdmin):
+    form = AlertRuleForm
+    list_display = ["title", "enabled", "direction", "severity"]
+
 admin.site.register(SearchAlias)

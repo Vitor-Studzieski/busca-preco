@@ -15,6 +15,7 @@ from .collectors.http import storefront_deadline
 from .identifiers import normalize_gtin
 from .models import Listing, Observation, Product, Store
 from .offer_search import SearchQuery, search_unit
+from .price_alerts import evaluate_for_listing
 from .services import collect_listing
 from .workflow_models import (
     Alert,
@@ -68,7 +69,7 @@ def enqueue_search(query, *, store_id=None, product=None, force=False):
         Store.objects.select_for_update().get(pk=store.pk)
         active = CollectionJob.objects.filter(store=store, lookup_key=lookup, product=product,
                                               status__in=OPEN, available_at__lte=now).first()
-        if active and not force:
+        if active:
             tasks.append(active)
             continue
         job, _ = CollectionJob.objects.get_or_create(
@@ -143,6 +144,9 @@ def schedule_due(now=None):
     for price in OwnPrice.objects.filter(Q(pk__in=active.values("pk")) | Q(pk__in=open_prices)):
         sync_promotion_alert(price, now)
     RateWindow.objects.filter(expires_at__lt=now).delete()
+    unresolved = Alert.objects.filter(kind="price", resolved_at__isnull=True).values("listing_id")
+    for listing in Listing.objects.filter(pk__in=unresolved).select_related("product", "store"):
+        evaluate_for_listing(listing, now)
 
 
 @transaction.atomic
@@ -248,6 +252,7 @@ def persist_confirmed_offer(job, result):
     Alert.objects.filter(key=f"listing:{listing.pk}", resolved_at__isnull=True).update(
         resolved_at=timezone.now()
     )
+    evaluate_for_listing(listing)
 
 
 def listing_result(job):
@@ -312,6 +317,9 @@ def finish_job(job, status, data, *, paused=False):
     current.finished_at = now
     current.save(update_fields=["status", "result", "finished_at"])
     listing_alert(job, status, data, now)
+    if job.listing_id:
+        listing = Listing.objects.select_related("product", "store").get(pk=job.listing_id)
+        evaluate_for_listing(listing, now)
     if job.run_id:
         run = CollectionRun.objects.select_for_update().get(pk=job.run_id)
         rows = list(run.jobs.values_list("store__retailer", "status"))

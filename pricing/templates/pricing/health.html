@@ -1,24 +1,36 @@
 {% extends 'pricing/base.html' %}
 {% block title %}Saúde das coletas{% endblock %}
 {% block content %}
-<h1>Saúde das coletas</h1>
-<div class="market-grid">
+<header class="page-heading"><h1>Saúde das coletas</h1><p>Consulte a última resposta de cada rede e as execuções da fila.</p></header>
+<div class="stat-board">
+  <div class="panel stat"><small>Próxima janela</small><strong>{{ next_collection|date:'d/m H:i' }}</strong></div>
+  <div class="panel stat"><small>Tarefas na fila</small><strong>{{ pending_jobs }}</strong></div>
+  <div class="panel stat"><small>Em execução</small><strong>{{ running_jobs }}</strong></div>
+</div>
+<div class="networks">
   {% for label, state in networks %}
-  <section class="panel work-panel">
+  <section class="panel network">
     <h2>{{ label }}</h2>
-    {% if state.last_success_at %}<p>Última resposta válida · {{ state.last_success_at|date:'d/m/Y H:i' }}</p>{% else %}<p>Sem resposta válida registrada.</p>{% endif %}
-    {% if state.next_attempt_at %}<small>Rede em pausa até {{ state.next_attempt_at|date:'d/m/Y H:i' }}</small>{% endif %}
+    {% if state.next_attempt_at and state.next_attempt_at > now %}<span class="status-pill" data-tone="danger">Em pausa</span><small>Nova tentativa a partir de {{ state.next_attempt_at|date:'d/m H:i' }}.</small>
+    {% elif state.failures %}<span class="status-pill" data-tone="warning">Última coleta com falha</span>
+    {% elif state.last_success_at %}<span class="status-pill" data-tone="success">Resposta válida</span>
+    {% else %}<span class="status-pill">Aguardando coleta</span>{% endif %}
+    <small>{% if state.last_success_at %}Última resposta válida · {{ state.last_success_at|date:'d/m/Y H:i' }}{% else %}Sem resposta válida registrada.{% endif %}</small>
   </section>
   {% endfor %}
 </div>
-<section class="panel work-panel">
-  <h2>Execuções</h2>
-  <ul class="flat-list">
-  {% for run in runs %}
-    <li><strong>{{ run.get_trigger_display|default:run.trigger }}</strong> · {{ run.created_at|date:'d/m/Y H:i' }}
-    {% if run.finished_at %}<small>{{ run.stats.processed }} unidades processadas · {{ run.stats.failed }} falhas</small>
-    {% elif run.started_at %}<small>Em andamento</small>{% else %}<small>Na fila</small>{% endif %}</li>
-  {% empty %}<li>Nenhuma execução registrada.</li>{% endfor %}
-  </ul>
+<section class="panel">
+  <div class="panel-heading"><h2>Execuções recentes</h2></div>
+  <div class="table-scroll" role="region" aria-label="Execuções de coleta" tabindex="0">
+    <table class="responsive-table"><thead><tr><th scope="col">Origem</th><th scope="col">Registrada</th><th scope="col">Estado</th><th scope="col">Resultado</th></tr></thead>
+    <tbody>{% for run in runs %}
+      <tr>
+        <th scope="row">{% if run.trigger == 'daily' %}Agendada{% elif run.trigger == 'price' %}Alteração de preço{% elif run.trigger == 'effective' %}Início de vigência{% else %}Solicitada pelo portal{% endif %}</th>
+        <td data-label="Registrada">{{ run.created_at|date:'d/m/Y H:i' }}</td>
+        <td data-label="Estado"><span class="status-pill" data-tone="{% if run.finished_at %}{% if run.stats.failed %}warning{% else %}success{% endif %}{% else %}warning{% endif %}">{% if run.finished_at %}Concluída{% elif run.started_at %}Em andamento{% else %}Na fila{% endif %}</span></td>
+        <td data-label="Resultado">{% if run.finished_at %}{{ run.stats.processed }} processadas · {{ run.stats.failed }} falhas{% else %}Aguardando conclusão{% endif %}</td>
+      </tr>
+    {% empty %}<tr><td colspan="4" class="table-empty">Nenhuma execução registrada.</td></tr>{% endfor %}</tbody></table>
+  </div>
 </section>
 {% endblock %}

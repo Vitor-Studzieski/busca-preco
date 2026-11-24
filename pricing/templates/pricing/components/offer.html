@@ -1,0 +1,10 @@
+<li class="offer-row"{% if offer.club or offer.condition == 'Promoção' or offer.condition == 'Clube' %} data-promotional{% endif %}>
+  <div class="offer-copy">
+    <a href="{{ offer.url }}" target="_blank" rel="noopener noreferrer">{{ offer.name }}</a>
+    <small>{{ offer.condition }} · {{ offer.availability }}</small>
+  </div>
+  <div class="offer-price">
+    <strong class="money">R$ {{ offer.price|floatformat:2 }}{% if offer.unit %}/{{ offer.unit }}{% endif %}</strong>
+    {% if offer.club %}<small>Clube · R$ {{ offer.club|floatformat:2 }}</small>{% endif %}
+  </div>
+</li>

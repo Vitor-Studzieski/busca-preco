@@ -22,6 +22,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "pricing",
+    "django_otp",
+    "django_otp.plugins.otp_totp",
 ]
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -29,6 +31,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django_otp.middleware.OTPMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "pricing.access.PortalSecurityMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -115,6 +118,7 @@ PRICING_COLLECTION_HOURS = tuple(
 if (len(PRICING_COLLECTION_HOURS) != 2 or len(set(PRICING_COLLECTION_HOURS)) != 2
         or any(hour not in range(24) for hour in PRICING_COLLECTION_HOURS)):
     raise ImproperlyConfigured("Defina dois horários distintos entre 0 e 23 para a coleta.")
+PRICING_ALLOW_MANUAL_LINKS = os.getenv("PRICING_ALLOW_MANUAL_LINKS", "0") == "1"
 PRICING_ENABLE_OWN_PRICES = os.getenv("PRICING_ENABLE_OWN_PRICES", "0") == "1"
 PRICING_REDIS_URL = os.getenv("PRICING_REDIS_URL", "")
 if PRICING_REDIS_URL:
@@ -130,7 +134,10 @@ if PRICING_REDIS_URL:
 PORTAL_ADMIN_PATH = os.getenv("PRICING_ADMIN_PATH", "admin/")
 if re.fullmatch(r"[a-z0-9_-]+/", PORTAL_ADMIN_PATH) is None:
     raise ImproperlyConfigured("PRICING_ADMIN_PATH deve conter um segmento de caminho seguido de barra.")
-SESSION_COOKIE_AGE = 30 * 24 * 60 * 60
+SESSION_IDLE_DAYS = int(os.getenv("PRICING_SESSION_IDLE_DAYS", "30"))
+if not 1 <= SESSION_IDLE_DAYS <= 90:
+    raise ImproperlyConfigured("Defina a duração da sessão entre 1 e 90 dias.")
+SESSION_COOKIE_AGE = SESSION_IDLE_DAYS * 24 * 60 * 60
 SESSION_SAVE_EVERY_REQUEST = True
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = "Lax"
@@ -160,6 +167,9 @@ if not DEBUG:
         SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     DATABASES["default"]["OPTIONS"] = {"sslmode": os.getenv("POSTGRES_SSLMODE", "prefer")}
     MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware")
+    INSTALLED_APPS[0] = "project.admin_apps.ProtectedAdminConfig"
+OTP_TOTP_ISSUER = "Portal Pompeia"
+OTP_ADMIN_HIDE_SENSITIVE_DATA = True
 ALLOW_DEV_PROVISIONING = DEBUG
 MIDDLEWARE.insert(0, "project.logging.RequestIdMiddleware")
 LOGGING = {

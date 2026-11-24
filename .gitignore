@@ -5,3 +5,7 @@ __pycache__/
 .env
 staticfiles/
 .DS_Store
+
+.coverage
+.coverage.*
+htmlcov/

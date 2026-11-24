@@ -48,7 +48,7 @@ def main():
                 for future in runners:
                     future.result()
                 elapsed = perf_counter() - start
-                results = client.get("/pesquisa/progresso/", {"token": ticket["token"]}).json()
+                results = client.get("/pesquisa/progresso/", HTTP_X_COLLECTION_TICKET=ticket["token"]).json()
                 start = perf_counter()
                 assert client.get("/", {"q": term}).status_code == 200
                 warm_ms = (perf_counter() - start) * 1000

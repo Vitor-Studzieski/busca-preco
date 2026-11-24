@@ -6,6 +6,9 @@ x-app-env: &app-env
   DJANGO_TRUST_LOCAL_PROXY: "1"
   PRICING_ADMIN_PATH: ${PRICING_ADMIN_PATH:?Defina o caminho administrativo com barra final}
   PRICING_REDIS_URL: redis://redis:6379/0
+  PRICING_SESSION_IDLE_DAYS: ${PRICING_SESSION_IDLE_DAYS:-30}
+  PRICING_ENABLE_OWN_PRICES: ${PRICING_ENABLE_OWN_PRICES:-0}
+  PRICING_ALLOW_MANUAL_LINKS: ${PRICING_ALLOW_MANUAL_LINKS:-0}
   PRICING_COLLECTION_HOURS: ${PRICING_COLLECTION_HOURS:-4,14}
   POSTGRES_DB: ${POSTGRES_DB:-pompeia}
   POSTGRES_HOST: postgres
@@ -13,7 +16,9 @@ x-app-env: &app-env
   POSTGRES_PASSWORD: ${POSTGRES_APP_PASSWORD:?Defina a senha do usuário de aplicação}
 services:
   postgres:
-    image: postgres:17
+    build:
+      context: .
+      dockerfile: deployment/postgres.Dockerfile
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-pompeia}
       POSTGRES_USER: ${POSTGRES_MIGRATION_USER:-pompeia_migrator}
@@ -27,7 +32,6 @@ services:
     networks: [database]
     volumes:
       - postgres:/var/lib/postgresql/data
-      - ./deployment/create-app-role.sh:/docker-entrypoint-initdb.d/10-app-role.sh:ro
   redis:
     image: redis:7-alpine
     networks: [database]
@@ -37,6 +41,8 @@ services:
       retries: 10
   migrate:
     build: .
+    read_only: true
+    tmpfs: [/tmp]
     environment:
       <<: *app-env
       POSTGRES_USER: ${POSTGRES_MIGRATION_USER:-pompeia_migrator}
@@ -47,6 +53,8 @@ services:
     networks: [database]
   web:
     build: .
+    read_only: true
+    tmpfs: [/tmp]
     environment: *app-env
     depends_on:
       migrate: {condition: service_completed_successfully}
@@ -59,6 +67,8 @@ services:
     restart: unless-stopped
   worker:
     build: .
+    read_only: true
+    tmpfs: [/tmp]
     command: ["python", "manage.py", "collection_worker"]
     environment: *app-env
     depends_on:

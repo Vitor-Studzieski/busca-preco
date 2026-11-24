@@ -9,11 +9,11 @@ O alvo é OWASP ASVS nível 2. A tabela reúne os controles auditados para esta 
 | Repúdio | Publicação, cancelamento e conta | Auditoria com ator, ação e metadados no banco. Atualização e remoção bloqueadas por trigger PostgreSQL. Pendente política de retenção e auditoria dos eventos administrativos de infraestrutura. |
 | Divulgação | Cookie, credenciais e coleta | Cookies seguros em produção, configuração por ambiente, exposição limitada ao escritório no proxy, HTTP externo só por HTTPS com host, caminho e DNS validados. TLS do servidor real ainda depende da implantação. |
 | Negação de serviço | Busca e fontes | Limites compartilhados, fila por unidade, timeout, pausas por rede e limite de 8 MiB por resposta. Pendente validação de capacidade no servidor de uso. |
-| Elevação de privilégio | Rotas de compra e manutenção | Verificação de autorização no servidor, provisionamento CLI em produção e caminho administrativo próprio. TOTP administrativo e validação por VPN/IP em produção permanecem pendentes. |
+| Elevação de privilégio | Rotas de compra e manutenção | Verificação de autorização no servidor, provisionamento CLI em produção e caminho administrativo próprio. TOTP administrativo é exigido no perfil de produção. Validação por VPN/IP permanece pendente no servidor. |
 
 | Área ASVS | Evidência | Estado |
 |---|---|---|
-| Autenticação e sessão | `pricing/accounts.py`, `pricing/access.py`, testes do fluxo | Implementado para compradores. Política final de duração e TOTP administrativo pendentes. |
+| Autenticação e sessão | `pricing/accounts.py`, `pricing/access.py`, testes do fluxo | Implementado para compradores. A duração final é uma decisão do escritório. O perfil de produção protege o painel técnico com TOTP. |
 | Controle de acesso | Testes de visitantes e compradores, token de progresso vinculado ao usuário | Cobertura das rotas principais. Revisar a matriz completa antes do deploy. |
 | Entrada e saída | Escapamento Django, montagem do DOM com textContent e validação de protocolo | Implementado. Cadastro de logos oficiais adiado. |
 | Comunicação | HTTPS obrigatório no perfil de produção, Caddy, HSTS e CSRF configuráveis | Configuração preparada. Certificado e perímetro reais pendentes. |

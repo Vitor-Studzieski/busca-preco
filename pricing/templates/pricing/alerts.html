@@ -1,14 +1,29 @@
 {% extends 'pricing/base.html' %}
 {% block title %}Alertas{% endblock %}
 {% block content %}
-<h1>Alertas</h1>
-<ul class="panel work-panel flat-list">
+<header class="page-heading"><h1>Alertas</h1><p>Acompanhe pendências de coleta, vínculos e promoções.</p></header>
+<div class="stat-board">
+  <div class="panel stat"><small>Abertos</small><strong>{{ open_count }}</strong></div>
+  <div class="panel stat"><small>Aguardam seu reconhecimento</small><strong>{{ unseen_count }}</strong></div>
+</div>
+<nav class="segment" aria-label="Filtrar alertas">
+  <a href="{% url 'pricing:alerts' %}"{% if view == 'open' %} aria-current="page"{% endif %}>Abertos</a>
+  <a href="{% url 'pricing:alerts' %}?view=unseen"{% if view == 'unseen' %} aria-current="page"{% endif %}>Não reconhecidos</a>
+  <a href="{% url 'pricing:alerts' %}?view=resolved"{% if view == 'resolved' %} aria-current="page"{% endif %}>Resolvidos</a>
+</nav>
+<div class="alert-list">
   {% for row in rows %}
-  <li class="work-actions">
-    <div><strong>{{ row.detail }}</strong><small>{{ row.opened_at|date:'d/m/Y H:i' }}{% if row.product %} · {{ row.product.name }}{% endif %}{% if row.listing %} · {{ row.listing.store }}{% endif %}</small></div>
-    {% if row.id in acknowledged %}<small>Reconhecido por você</small>
-    {% else %}<form method="post" action="{% url 'pricing:acknowledge' row.pk %}">{% csrf_token %}<button type="submit">Reconhecer</button></form>{% endif %}
-  </li>
-  {% empty %}<li>Nenhum alerta aberto.</li>{% endfor %}
-</ul>
+  <article class="panel alert-record">
+    <div>
+      <span class="status-pill" data-tone="{% if row.resolved_at %}success{% elif row.kind == 'promotion' %}warning{% else %}danger{% endif %}">
+        {% if row.resolved_at %}Resolvido{% elif row.kind == 'promotion' %}Promoção em vigência{% elif row.kind == 'match' %}Vínculo divergente{% elif row.kind == 'price' %}Diferença de preço{% else %}Coleta{% endif %}
+      </span>
+      <h2>{{ row.detail }}</h2><small>{{ row.opened_at|date:'d/m/Y H:i' }}{% if row.product %} · {{ row.product.name }}{% endif %}{% if row.listing %} · {{ row.listing.store }}{% endif %}</small>
+    </div>
+    {% if row.resolved_at %}<small>{{ row.resolved_at|date:'d/m/Y H:i' }}</small>
+    {% elif row.id in acknowledged %}<small>Reconhecido por você</small>
+    {% else %}<form method="post" action="{% url 'pricing:acknowledge' row.pk %}">{% csrf_token %}<button class="secondary" type="submit">Reconhecer</button></form>{% endif %}
+  </article>
+  {% empty %}<div class="panel empty-state"><h2>Nenhum alerta neste filtro</h2><p>As pendências registradas pelas coletas aparecem aqui.</p></div>{% endfor %}
+</div>
 {% endblock %}

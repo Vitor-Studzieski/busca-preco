@@ -1,9 +1,14 @@
+import re
 from decimal import Decimal
+from pathlib import Path
 
 from django import forms
+from django.contrib.staticfiles import finders
 
 from .collectors import CollectionError, validate_product_url
-from .models import Listing, PriceDraft, Product
+from .models import Listing, PriceDraft, Product, Store
+from .price_alerts import LEVELS, valid_rule
+from .workflow_models import AlertRule, OwnPrice
 
 
 class ProductForm(forms.ModelForm):
@@ -44,8 +49,6 @@ class PriceDraftForm(forms.ModelForm):
 
 
 class PublishPriceForm(forms.Form):
-    from .workflow_models import OwnPrice
-
     amount = forms.DecimalField(label="Valor", min_value=Decimal("0.01"), max_digits=12, decimal_places=2,
                                 localize=True)
     kind = forms.ChoiceField(label="Tipo de preço", choices=OwnPrice.Kind.choices)
@@ -59,3 +62,46 @@ class PublishPriceForm(forms.Form):
         data = super().clean()
         data.pop("confirm", None)
         return data
+
+
+class AlertRuleForm(forms.ModelForm):
+    direction = forms.ChoiceField(
+        required=False,
+        choices=(("", "Selecione"), ("higher", "Concorrente acima"), ("lower", "Concorrente abaixo")),
+    )
+    severity = forms.ChoiceField(required=False, choices=(("", "Selecione"), *LEVELS))
+
+    class Meta:
+        model = AlertRule
+        fields = ["title", "enabled", "direction", "amount", "percentage", "severity", "window_minutes"]
+
+    def clean(self):
+        data = super().clean()
+        if not self.errors and data.get("enabled") and not valid_rule(AlertRule(**data)):
+            raise forms.ValidationError("Defina direção, limite positivo, severidade e janela antes de ativar a regra.")
+        return data
+
+
+class StoreForm(forms.ModelForm):
+    class Meta:
+        model = Store
+        fields = ["active", "display_order", "logo"]
+
+    def clean_logo(self):
+        asset = self.cleaned_data["logo"]
+        if not asset:
+            return asset
+        if not re.fullmatch(r"pricing/stores/[a-zA-Z0-9_-]+\.(?:png|webp|jpg)", asset):
+            raise forms.ValidationError("Informe um recurso estático aprovado em pricing/stores/.")
+        filename = finders.find(asset)
+        if not filename or Path(filename).stat().st_size > 256 * 1024:
+            raise forms.ValidationError("Recurso não encontrado ou acima de 256 KiB.")
+        signature = Path(filename).read_bytes()[:12]
+        valid = (
+            asset.endswith(".png") and signature.startswith(b"\x89PNG\r\n\x1a\n")
+            or asset.endswith(".jpg") and signature.startswith(b"\xff\xd8\xff")
+            or asset.endswith(".webp") and signature[:4] == b"RIFF" and signature[8:] == b"WEBP"
+        )
+        if not valid:
+            raise forms.ValidationError("O conteúdo não corresponde ao formato de imagem informado.")
+        return asset

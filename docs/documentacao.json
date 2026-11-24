@@ -1,6 +1,6 @@
 {
   "titulo": "Portal de precificação do Supermercado Pompeia",
-  "versao": "2.0",
+  "versao": "2.1",
   "data": "2026-11-24",
   "escopo": {
     "publico": "Dois compradores autorizados",
@@ -10,9 +10,9 @@
     "separacao_de_perfis": "Portal de compradores e manutenção técnica restrita"
   },
   "navegacao": {
-    "/": "Pesquisa com último preço gravado por unidade e atualização progressiva",
-    "/fila/": "Pesquisas com preço confirmado incluídas na pré-coleta. A fila de produtos próprios depende do catálogo futuro.",
-    "/alertas/": "Alertas persistentes de rede, coleta e vigência, com reconhecimento por comprador",
+    "/": "Área de trabalho com navegação lateral, busca fixa e ofertas por unidade, filtro de promoções, última coleta e estados de atualização",
+    "/fila/": "Fila com totais reais, filtros salvos na sessão, paginação e atualização em lote com confirmação",
+    "/alertas/": "Alertas persistentes com filtros de abertos, aguardando reconhecimento e resolvidos",
     "/coletas/": "Última resposta válida, pausa por rede e execuções",
     "/dispositivos/": "Sessões conectadas, revogação e troca de senha",
     "/healthz/": "Disponibilidade do banco e do Redis quando configurado"
@@ -57,7 +57,8 @@
     "producao": "PostgreSQL e Redis obrigatórios, Gunicorn, configuração Caddy e Docker Compose",
     "compatibilidade_local": "SQLite para desenvolvimento e testes rápidos",
     "fila": "Jobs persistentes em PostgreSQL, um job em execução por rede, worker com até três threads",
-    "isolamento_frontend": "O request GET da pesquisa consulta somente o banco. A atualização é enfileirada via POST e acompanhada por polling autenticado."
+    "isolamento_frontend": "O request GET da pesquisa consulta somente o banco. A atualização é enfileirada via POST e acompanhada por polling autenticado.",
+    "validacao": "Compose provado em rede Docker isolada com PostgreSQL, Redis, worker e web. Instalação do escritório pendente."
   },
   "modelo": {
     "cadastro_original": [
@@ -108,7 +109,8 @@
     ],
     "senha": "Argon2 e integração com gerenciador do navegador",
     "protecao": "CSRF, rate limiting, sessão mantida no servidor, revogação de outras sessões e CSP",
-    "restricao_de_rede": "Allowlist por CIDR implementada no proxy de exemplo. Hostname, TLS e rede do escritório precisam ser configurados no servidor real."
+    "restricao_de_rede": "Allowlist por CIDR implementada no proxy de exemplo. Hostname, TLS e rede do escritório precisam ser configurados no servidor real.",
+    "administracao": "TOTP obrigatório no painel técnico em produção. Provisionamento via enroll_admin_otp."
   },
   "evidencias": {
     "buscas_reais_por_versao": 30,
@@ -129,11 +131,12 @@
       "seguranca.md",
       "runbook.md",
       "perguntas-em-aberto.md",
-      "entrega.md"
+      "entrega.md",
+      "revisao-do-prompt.md"
     ],
-    "tests_postgresql": 64,
+    "tests_postgresql": 75,
     "tests_sqlite": {
-      "total": 64,
+      "total": 75,
       "ignorados": 1
     },
     "verificacao_estatica": [
@@ -142,6 +145,14 @@
       "pip-audit",
       "check --deploy",
       "docker compose config"
+    ],
+    "cobertura_codigo_producao_percentual": 80,
+    "capturas": [
+      "pesquisa-redesenho-desktop.png",
+      "pesquisa-redesenho-mobile.png",
+      "fila-redesenho.png",
+      "alertas-redesenho.png",
+      "saude-redesenho.png"
     ]
   },
   "pendencias": [

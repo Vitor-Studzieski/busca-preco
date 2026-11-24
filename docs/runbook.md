@@ -26,3 +26,13 @@ Para voltar ao código anterior antes do corte, reative a base anterior pelo bac
 - **Rodar um ciclo avulso.** Use `python manage.py collection_worker --once` para agendar a janela vencida e processar um job. Use `collect_offers --unidade IDENTIFICADOR` somente para anúncios já cadastrados enquanto o worker está parado.
 - **Rotacionar segredos.** Atualize os segredos no ambiente, altere as credenciais do banco e reinicie os serviços com a configuração nova. A troca da chave de sessão exige novo login. Mantenha segredos e dumps fora do Git.
 - **Catálogo futuro.** Quando o CSV chegar, valide os campos `sku;nome;embalagem;ean;preco_vigente` e importe com `python manage.py import_products ARQUIVO` em uma base de validação antes da carga real.
+
+## Autenticação técnica
+
+Em produção, vincule um autenticador ao administrador antes de acessar o Django Admin. Gere uma chave Base32 de 20 bytes no gerenciador de segredos da empresa, registre-a no aplicativo autenticador e execute `docker compose exec web python manage.py enroll_admin_otp USUARIO`. Digite a chave e o código atual nos prompts ocultos. Use o próximo código válido ao entrar no painel. O portal dos compradores usa uma sessão diferente da verificação do painel técnico. Consulte a [documentação do django-otp](https://django-otp-official.readthedocs.io/en/stable/auth.html).
+
+`PRICING_SESSION_IDLE_DAYS` define a duração deslizante, com 30 dias como padrão. Deixe `PRICING_ENABLE_OWN_PRICES=0` até integrar o catálogo. `PRICING_ALLOW_MANUAL_LINKS` só deve ser ativada após estabelecer a política para casos sem GTIN. Para logos oficiais, inclua a imagem aprovada em `pricing/static/pricing/stores/`, respeitando os formatos PNG, JPG ou WebP e o limite de 256 KiB, e selecione o caminho no cadastro da unidade.
+
+## Backups criptografados
+
+Com `pg_dump` e `age` instalados no host de backup, agende `deployment/backup_postgres.sh` fora da aplicação e forneça `BACKUP_DIR`, `AGE_RECIPIENT` e as variáveis padrão de conexão do PostgreSQL. Use arquivo `.pgpass` com permissão restrita ou injeção de segredo pelo ambiente gerenciado. O script publica o arquivo final após a gravação bem-sucedida e não apaga cópias antigas. Valide com `age --decrypt -i IDENTIDADE ARQUIVO | pg_restore --list` e restaure em banco separado durante a homologação. A custódia da chave e o agendamento dependem do servidor do escritório.

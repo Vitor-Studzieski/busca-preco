@@ -72,7 +72,7 @@ class CompetitorSearchTests(TestCase):
             while work_once():
                 pass
             response = self.client.get(reverse("pricing:search"), {"q": "Coca 2 litros"})
-            partial = self.client.get(reverse("pricing:progress"), {"token": job["token"]}).json()
+            partial = self.client.get(reverse("pricing:progress"), HTTP_X_COLLECTION_TICKET=job["token"]).json()
         self.assertEqual(sum(row["state"] == "updated" for row in partial["rows"]), 3)
         self.assertIn("O Tauste não respondeu.", [row["reason"] for row in partial["rows"]])
         self.assertContains(response, "10,90", count=3)

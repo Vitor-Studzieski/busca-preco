@@ -1,0 +1,19 @@
+<section class="panel history" aria-labelledby="history-title">
+  <div class="panel-heading"><div><h2 id="history-title">Histórico de preços</h2><p>Registros dos últimos 30 dias.</p></div></div>
+  {% if history %}
+    {{ history_chart|json_script:"price-history-data" }}
+    {% if history_chart %}<canvas data-price-chart aria-hidden="true"></canvas>{% endif %}
+    <details>
+      <summary>Ver registros e unidades de preço</summary>
+      <div class="table-scroll" tabindex="0" role="region" aria-label="Registros históricos">
+        <table class="responsive-table"><thead><tr><th scope="col">Data</th><th scope="col">Origem</th><th scope="col">Preço</th></tr></thead>
+        <tbody>{% for point in history %}<tr>
+          <td data-label="Data">{{ point.date|date:'d/m/Y H:i' }}</td><th scope="row">{{ point.name }}</th>
+          <td data-label="Preço"><strong class="money">R$ {{ point.amount|floatformat:2 }}{% if point.unit %}/{{ point.unit }}{% endif %}</strong></td>
+        </tr>{% endfor %}</tbody></table>
+      </div>
+    </details>
+  {% else %}
+    <p class="panel-text muted">Ainda não há preços registrados neste período.</p>
+  {% endif %}
+</section>

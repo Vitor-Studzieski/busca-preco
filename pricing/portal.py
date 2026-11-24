@@ -1,3 +1,4 @@
+from datetime import timedelta
 
 from django.conf import settings
 from django.contrib import messages
@@ -5,7 +6,7 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.core import signing
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
-from django.db.models import OuterRef, Subquery
+from django.db.models import Count, OuterRef, Subquery
 from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -15,10 +16,10 @@ from django.views.decorators.http import require_GET, require_POST
 
 from .forms import PublishPriceForm
 from .jobs import OPEN, enqueue_product_collection, enqueue_search, normalized_lookup
-from .models import Product, Store
+from .models import Listing, Product, Store
 from .price_workflow import cancel_price, publish_price
 from .request_limits import search_retry_after
-from .selectors import comparison, find_products
+from .selectors import comparison, find_products, product_history
 from .workflow_models import (
     Alert,
     AlertAcknowledgment,
@@ -52,33 +53,50 @@ def search(request):
             raise Http404
         product = get_object_or_404(Product, pk=int(product_id), active=True)
     else:
-        product = products[0] if len(products) == 1 else None
+        exact = [item for item in products if item.search_rank < 2]
+        choices = exact or products
+        product = choices[0] if len(choices) == 1 else None
     price, amount, rows = comparison(product) if product else (None, None, [])
     result_query = f"{product.name} {product.package}" if product else query
     cached = {}
+    last_attempt = {}
     if result_query:
-        latest = CollectionJob.objects.filter(
-            lookup_key=normalized_lookup(result_query), store__active=True,
-            status__in=(CollectionJob.Status.UPDATED, CollectionJob.Status.UNAVAILABLE),
-        )
-        latest_for_store = latest.filter(store_id=OuterRef("pk")).order_by("-finished_at", "-pk")
-        latest_ids = Store.objects.filter(active=True).annotate(
-            cache_id=Subquery(latest_for_store.values("pk")[:1])
-        ).values_list("cache_id", flat=True)
-        for job in CollectionJob.objects.filter(pk__in=latest_ids):
-            cached.setdefault(job.store_id, job)
-    stores = [row["store"] for row in rows] if product else list(
-        Store.objects.filter(active=True).order_by("display_order", "pk")
-    ) if query else []
+        attempts = CollectionJob.objects.filter(
+            lookup_key=normalized_lookup(result_query), store__active=True, store_id=OuterRef("pk"),
+            finished_at__isnull=False,
+        ).order_by("-finished_at", "-pk")
+        confirmed = attempts.filter(status__in=(CollectionJob.Status.UPDATED, CollectionJob.Status.UNAVAILABLE))
+        newest_ids = list(Store.objects.filter(active=True).annotate(
+            cache_id=Subquery(confirmed.values("pk")[:1]),
+            attempt_id=Subquery(attempts.values("pk")[:1]),
+        ).values_list("pk", "cache_id", "attempt_id"))
+        jobs = CollectionJob.objects.in_bulk({job_id for _, cache_id, attempt_id in newest_ids
+                                             for job_id in (cache_id, attempt_id) if job_id is not None})
+        cached = {store_id: jobs[cache_id] for store_id, cache_id, _ in newest_ids if cache_id in jobs}
+        last_attempt = {store_id: jobs[attempt_id] for store_id, _, attempt_id in newest_ids if attempt_id in jobs}
+    configured_stores = list(Store.objects.filter(active=True).order_by("display_order", "pk"))
+    stores = [row["store"] for row in rows] if product else configured_stores if query else []
+    history, history_chart = product_history(product) if product else ([], [])
+    link_candidates = Listing.objects.none()
+    if product and product.gtin and request.user.has_perm("pricing.add_pricedraft"):
+        link_candidates = Listing.objects.filter(active=True, store__active=True, gtin=product.gtin,
+                                                  status=Listing.Status.OK).exclude(
+            product=product
+        ).select_related("store")[:16]
+    preview_prices = [{"label": str(row["store"]), "amount": str(row["observation"].price)}
+                      for row in rows if row["eligible"]]
     for job in cached.values():
         job.fresh = bool(job.finished_at and timezone.localtime(job.finished_at).date() == timezone.localdate())
-    cached_rows = [(store, cached.get(store.pk)) for store in stores]
+    cached_rows = [(store, cached.get(store.pk), last_attempt.get(store.pk)) for store in stores]
     return render(request, "pricing/workbench.html", {
-        "query": query, "recent_queries": request.session.get("recent_queries", []), "cached_rows": cached_rows, "own_enabled": settings.PRICING_ENABLE_OWN_PRICES, "products": products, "product": product, "price": price, "amount": amount,
+        "query": query, "result_query": result_query, "configured_stores": configured_stores,
+        "history": history, "history_chart": history_chart, "preview_prices": preview_prices,
+        "link_candidates": link_candidates,
+        "recent_queries": request.session.get("recent_queries", []), "cached_rows": cached_rows, "own_enabled": settings.PRICING_ENABLE_OWN_PRICES, "products": products, "product": product, "price": price, "amount": amount,
         "rows": rows, "stores": stores,
         "configured": (not settings.PRICING_ENABLE_OWN_PRICES
                        or bool(product or Product.objects.filter(active=True).exists())),
-        "publish_ready": bool(rows and all(row["comparable"] for row in rows)),
+        "publish_ready": bool(rows and all(row["eligible"] for row in rows)),
     })
 
 
@@ -140,7 +158,7 @@ def refresh(request):
 @require_GET
 def progress(request):
     try:
-        token = signing.loads(request.GET.get("token", ""), salt=TOKEN_SCOPE, max_age=600)
+        token = signing.loads(request.headers.get("X-Collection-Ticket", ""), salt=TOKEN_SCOPE, max_age=600)
     except signing.BadSignature as error:
         raise Http404 from error
     if token["buyer"] != request.user.pk:
@@ -149,23 +167,6 @@ def progress(request):
     return JsonResponse({"complete": all(job.status not in OPEN for job in jobs),
                          "rows": [{"store": job.store_id, "state": job.status,
                                    "label": job.get_status_display(), **job.result} for job in jobs]})
-
-
-@login_required
-@portal_access
-@never_cache
-@require_GET
-def day_queue(request):
-    today = timezone.localdate()
-    rows = DayItem.objects.filter(day=today).select_related("product", "buyer").order_by("product__name")
-    status = request.GET.get("status", "")
-    return render(request, "pricing/queue.html", {
-        "rows": rows.filter(status=status) if status in DayItem.Status.values else rows,
-        "total": rows.count(), "reviewed": rows.exclude(status=DayItem.Status.PENDING).count(),
-        "statuses": DayItem.Status.choices, "status": status, "today": today,
-        "own_enabled": settings.PRICING_ENABLE_OWN_PRICES,
-        "monitored": MonitoredQuery.objects.order_by("-last_used_at")[:100],
-    })
 
 
 @login_required
@@ -198,10 +199,22 @@ def queue_action(request, pk):
 @never_cache
 @require_GET
 def alerts(request):
-    rows = Alert.objects.filter(resolved_at__isnull=True).select_related("product", "listing__store")
+    rows = Alert.objects.select_related("product", "listing__store")
+    current = rows.filter(resolved_at__isnull=True)
+    acknowledgments = AlertAcknowledgment.objects.filter(buyer=request.user).values_list("alert_id", flat=True)
+    unseen = current.exclude(pk__in=acknowledgments)
+    view = request.GET.get("view", "open")
+    if view == "resolved":
+        selected = rows.filter(resolved_at__isnull=False).order_by("-resolved_at")
+    elif view == "unseen":
+        selected = unseen.order_by("-opened_at")
+    else:
+        view = "open"
+        selected = current.order_by("-opened_at")
+    selected = list(selected[:100])
     return render(request, "pricing/alerts.html", {
-        "rows": rows.order_by("-opened_at")[:100],
-        "acknowledged": set(AlertAcknowledgment.objects.filter(buyer=request.user).values_list("alert_id", flat=True)),
+        "rows": selected, "view": view, "open_count": current.count(), "unseen_count": unseen.count(),
+        "acknowledged": set(acknowledgments.filter(alert_id__in=[row.pk for row in selected])),
     })
 
 
@@ -222,8 +235,16 @@ def acknowledge(request, pk):
 def collection_health(request):
     status = {row.retailer: row for row in NetworkHealth.objects.all()}
     runs = CollectionRun.objects.order_by("-created_at")[:20]
+    now = timezone.localtime()
+    hours = sorted(settings.PRICING_COLLECTION_HOURS)
+    future = [now.replace(hour=hour, minute=0, second=0, microsecond=0) for hour in hours]
+    next_collection = next((item for item in future if item > now), future[0] + timedelta(days=1))
+    counts = dict(CollectionJob.objects.filter(status__in=OPEN).values_list("status").annotate(total=Count("pk")))
     return render(request, "pricing/health.html", {
         "networks": [(label, status.get(code)) for code, label in Store.Retailer.choices], "runs": runs,
+        "pending_jobs": counts.get(CollectionJob.Status.PENDING, 0),
+        "running_jobs": counts.get(CollectionJob.Status.RUNNING, 0),
+        "next_collection": next_collection, "now": now,
     })
 
 
@@ -249,7 +270,7 @@ def publish(request, pk):
         for errors in form.errors.values():
             for error in errors:
                 messages.error(request, error)
-    return redirect("pricing:product", pk=pk)
+    return redirect(reverse("pricing:search") + f"?produto={pk}")
 
 
 @login_required
