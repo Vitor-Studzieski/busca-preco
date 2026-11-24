@@ -1,0 +1,38 @@
+{% load static %}<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Pesquisa de preços{% endblock %} | Supermercado Pompeia</title>
+  <link rel="icon" type="image/png" href="{% static 'pricing/pompeia-logo.png' %}">
+  <link rel="stylesheet" href="{% static 'pricing/main.css' %}">
+</head>
+<body>
+  <a class="skip" href="#conteudo">Pular para o conteúdo</a>
+  {% if user.is_authenticated %}
+    <header class="header">
+      <div class="header-inner">
+        <a class="brand" href="{% url 'pricing:search' %}">
+          <img class="brand-logo" src="{% static 'pricing/pompeia-logo.png' %}" width="44" height="44" alt="">
+          <span>Supermercado Pompeia</span>
+        </a>
+        <nav class="workspace-nav" aria-label="Áreas do comprador">
+          <a href="{% url 'pricing:search' %}"{% if request.resolver_match.url_name == 'search' %} aria-current="page"{% endif %}>Pesquisar</a>
+          <a href="{% url 'pricing:dashboard' %}"{% if request.resolver_match.url_name == 'dashboard' %} aria-current="page"{% endif %}>Visão geral</a>
+          <a href="{% url 'pricing:dashboard_comparisons' %}"{% if request.resolver_match.url_name == 'dashboard_comparisons' %} aria-current="page"{% endif %}>Comparativos</a>
+          <a href="{% url 'pricing:dashboard_promotions' %}"{% if request.resolver_match.url_name == 'dashboard_promotions' %} aria-current="page"{% endif %}>Promoções</a>
+          <a href="{% url 'pricing:dashboard_merchandising' %}"{% if request.resolver_match.url_name == 'dashboard_merchandising' %} aria-current="page"{% endif %}>Mercadológico</a>
+          <a href="{% url 'pricing:dashboard_alerts' %}"{% if request.resolver_match.url_name == 'dashboard_alerts' %} aria-current="page"{% endif %}>Alertas</a>
+        </nav>
+        <nav class="account-nav" aria-label="Conta">
+          <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="link" type="submit">Sair</button></form>
+        </nav>
+      </div>
+    </header>
+  {% endif %}
+  <main id="conteudo" class="shell">
+    {% for message in messages %}<p class="notice" role="status">{{ message }}</p>{% endfor %}
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

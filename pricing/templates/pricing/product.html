@@ -1,0 +1,74 @@
+{% extends 'pricing/base.html' %}
+{% block title %}{{ product.name }}{% endblock %}
+{% block content %}
+<a class="back" href="{% url 'pricing:search' %}">← Voltar à pesquisa</a>
+<section class="intro product-heading">
+  <div>
+    <h1>{{ product.name }}</h1>
+    <p>{{ product.package }} · SKU {{ product.sku }}{% if product.gtin %} · GTIN {{ product.gtin }}{% endif %}</p>
+  </div>
+  <div class="current-price">
+    <span>Preço vigente · Pompeia</span>
+    <strong>{% if product.current_price is not None %}R$ {{ product.current_price|floatformat:2 }}{% else %}A cadastrar{% endif %}</strong>
+  </div>
+</section>
+<div class="product-grid">
+  <section class="panel offers" aria-labelledby="offers-title">
+    <div class="section-top">
+      <h2 id="offers-title">Preços por unidade</h2>
+      {% if perms.pricing.add_listing and user.is_staff %}<a href="{% url 'admin:pricing_listing_add' %}">Cadastrar anúncio</a>{% endif %}
+    </div>
+    <div class="table-scroll" tabindex="0" role="region" aria-label="Preços dos concorrentes">
+      <table>
+        <thead><tr><th scope="col">Supermercado</th><th scope="col">Preço</th><th scope="col">Condição e coleta</th></tr></thead>
+        <tbody>
+          {% for row in rows %}
+            <tr>
+              <th scope="row">
+                <strong>{{ row.store.get_retailer_display }}</strong><small>{{ row.store.unit }}</small>
+                {% if row.listing.external_code %}<small>Código {{ row.listing.external_code }}</small>{% endif %}
+              </th>
+              <td class="money">
+                {% if row.observation %}
+                  R$ {{ row.observation.price|floatformat:2 }}{% if row.observation.price_unit %}/{{ row.observation.price_unit }}{% endif %}
+                  {% if row.observation.club_price %}<small>Clube · R$ {{ row.observation.club_price|floatformat:2 }}</small>{% endif %}
+                  {% if row.historical %}<small>Último registro</small>{% endif %}
+                {% else %}
+                  <span aria-label="Sem preço">—</span>
+                {% endif %}
+              </td>
+              <td>
+                <span class="offer-status">{{ row.status }}</span>
+                {% if row.observation %}
+                  <small>{{ row.observation.get_condition_display }} · {{ row.observation.observed_at|date:'d/m/Y H:i' }}{% if row.stale %} · Desatualizado{% endif %}</small>
+                  <a class="source" href="{{ row.observation.source_url }}" target="_blank" rel="noopener noreferrer">Ver oferta <span aria-hidden="true">↗</span></a>
+                {% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="3">Nenhuma unidade cadastrada.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  {% if can_draft %}
+    <section class="panel draft" aria-labelledby="draft-title">
+      <h2 id="draft-title">Propor preço</h2>
+      <form method="post" action="{% url 'pricing:product' product.pk %}">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button class="primary" type="submit">Salvar rascunho</button>
+      </form>
+      {% if drafts %}
+        <h3>Rascunhos recentes</h3>
+        <ul class="draft-list">
+          {% for draft in drafts %}
+            <li><strong>R$ {{ draft.amount|floatformat:2 }}</strong><small>{{ draft.author.get_username }} · {{ draft.created_at|date:'d/m/Y H:i' }}</small>{% if draft.note %}<p>{{ draft.note }}</p>{% endif %}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </section>
+  {% endif %}
+</div>
+{% endblock %}

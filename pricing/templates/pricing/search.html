@@ -1,0 +1,85 @@
+{% extends 'pricing/base.html' %}
+{% load static %}
+{% block content %}
+<section class="intro search-intro"><h1>Pesquisa de preços</h1></section>
+<section class="panel search-panel" aria-label="Buscar produto">
+  <form method="get" action="{% url 'pricing:search' %}" role="search" data-market-search>
+    <label for="product-query">Produto</label>
+    <div class="search-bar">
+      <input type="search" id="product-query" name="q" value="{{ query }}" placeholder="Ex.: Coca Cola 2 litros" maxlength="255" required>
+      <button class="primary" type="submit">Buscar</button>
+    </div>
+    <p class="search-status" role="status"></p>
+  </form>
+</section>
+{% if retry_after %}
+  <p class="panel empty" role="alert">Limite de buscas atingido. Tente novamente em {{ retry_after }} segundos.</p>
+{% elif query %}
+  <section class="market-results" aria-labelledby="result-title">
+    <h2 id="result-title">Preços encontrados para “{{ query }}”</h2>
+    <div class="market-grid">
+      <section class="panel market-store own-store" aria-labelledby="store-pompeia">
+        <div class="market-store-heading">
+          <h3 id="store-pompeia"><img class="store-logo" src="{% static 'pricing/pompeia-logo.png' %}" alt=""> Supermercado Pompeia</h3>
+          <small>Catálogo interno</small>
+        </div>
+        {% if products %}
+          <ul class="market-offers">
+            {% for product in products %}
+              <li><div class="market-offer">
+                <div>
+                  <a href="{% url 'pricing:product' product.pk %}">{{ product.name }} · {{ product.package }}</a>
+                  <small>SKU {{ product.sku }}{% if product.gtin %} · EAN {{ product.gtin }}{% endif %}</small>
+                </div>
+                <div class="market-price">
+                  {% if product.current_price is not None %}<strong class="money">R$ {{ product.current_price|floatformat:2 }}</strong>
+                  {% else %}<strong class="money price-missing">—</strong><small>Preço não cadastrado</small>{% endif %}
+                </div>
+              </div></li>
+            {% endfor %}
+          </ul>
+          {% if more_results %}<p class="muted">Exibindo os primeiros 50 itens. Refine a busca.</p>{% endif %}
+        {% else %}
+          <p class="empty-inline">Nenhum produto correspondente no catálogo do Pompeia.</p>
+        {% endif %}
+      </section>
+      {% for result in store_results %}
+        <section class="panel market-store" aria-labelledby="store-{{ result.store.slug }}">
+          <div class="market-store-heading">
+            <h3 id="store-{{ result.store.slug }}">{{ result.store.get_retailer_display }} <span>{{ result.store.unit }}</span></h3>
+            {% if result.observed_at %}<small>Consultado às {{ result.observed_at|date:'H:i' }}</small>{% endif %}
+          </div>
+          {% if result.offers %}
+            <ul class="market-offers">
+              {% for item in result.offers %}
+                {% with offer=item.collected %}
+                  <li><div class="market-offer">
+                    <div>
+                      <a href="{{ offer.url }}" target="_blank" rel="noopener noreferrer">{{ offer.name }}</a>
+                      <small>{{ item.condition }} · {{ item.availability }}</small>
+                    </div>
+                    <div class="market-price">
+                      <strong class="money">R$ {{ offer.price|floatformat:2 }}{% if offer.price_unit %}/{{ offer.price_unit }}{% endif %}</strong>
+                      {% if offer.club_price %}<small>Clube · R$ {{ offer.club_price|floatformat:2 }}</small>{% endif %}
+                    </div>
+                  </div></li>
+                {% endwith %}
+              {% endfor %}
+            </ul>
+          {% elif not result.issue and not result.unpriced %}
+            <p class="muted">Nenhuma oferta correspondente nos resultados da loja.</p>
+          {% endif %}
+          {% if result.unpriced %}
+            <p class="market-issue">Encontrado no site, sem preço confirmado</p>
+            <ul class="market-offers">{% for item in result.unpriced %}<li><a href="{{ item.url }}" target="_blank" rel="noopener noreferrer">{{ item.name }}</a></li>{% endfor %}</ul>
+          {% endif %}
+          {% if result.issue %}<p class="market-issue">{{ result.issue }}</p>{% endif %}
+        </section>
+      {% empty %}
+        <p class="panel empty">Nenhuma unidade configurada para a pesquisa.</p>
+      {% endfor %}
+    </div>
+  </section>
+{% endif %}
+<script defer src="{% static 'pricing/search.js' %}"></script>
+{% endblock %}

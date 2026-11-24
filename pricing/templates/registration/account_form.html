@@ -1,0 +1,18 @@
+{% extends 'pricing/base.html' %}
+{% load static %}
+{% block title %}{{ heading }}{% endblock %}
+{% block content %}
+<section class="panel login" aria-labelledby="account-heading">
+  {% if not user.is_authenticated %}
+    <img class="login-logo" src="{% static 'pricing/pompeia-logo.png' %}" width="112" height="112" alt="Supermercado Pompeia">
+  {% endif %}
+  <h1 id="account-heading">{{ heading }}</h1>
+  {% if description %}<p class="login-description">{{ description }}</p>{% endif %}
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    {% block hidden_fields %}{% endblock %}
+    <button class="primary" type="submit">{{ button_label }}</button>
+  </form>
+</section>
+{% endblock %}

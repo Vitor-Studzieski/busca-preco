@@ -1,0 +1,4 @@
+{% extends 'registration/account_form.html' %}
+{% block hidden_fields %}
+  {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+{% endblock %}
