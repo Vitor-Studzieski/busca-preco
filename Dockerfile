@@ -13,5 +13,5 @@ COPY --chown=app:app manage.py ./manage.py
 COPY --chown=app:app project ./project
 COPY --chown=app:app pricing ./pricing
 USER app
-RUN python manage.py collectstatic --noinput
+RUN DJANGO_DEBUG=1 POSTGRES_DB=build POSTGRES_USER=build POSTGRES_PASSWORD=build python manage.py collectstatic --noinput
 CMD ["sh", "-c", "exec gunicorn project.wsgi:application --bind 0.0.0.0:8000 --workers 2 --access-logfile - --access-logformat '%(m)s %(U)s %(s)s %(D)s'"]

@@ -63,6 +63,7 @@ TEMPLATES = [
 WSGI_APPLICATION = "project.wsgi.application"
 
 DATABASE_URL = os.getenv("DATABASE_URL") or os.getenv("POSTGRES_URL")
+POSTGRES_DB = os.getenv("POSTGRES_DB")
 if DATABASE_URL:
     parsed_database_url = urlsplit(DATABASE_URL)
     if (parsed_database_url.scheme not in {"postgres", "postgresql"}
@@ -79,21 +80,33 @@ if DATABASE_URL:
         "OPTIONS": {
             "sslmode": database_query.get("sslmode", [os.getenv("POSTGRES_SSLMODE", "require")])[0],
         },
+        "CONN_MAX_AGE": 0,
     }}
-elif os.getenv("POSTGRES_DB"):
+elif POSTGRES_DB:
+    required_database_variables = ("POSTGRES_USER", "POSTGRES_PASSWORD")
+    missing_database_variables = [
+        name for name in required_database_variables if not os.getenv(name)
+    ]
+    if missing_database_variables:
+        raise ImproperlyConfigured(
+            "Configure as variáveis PostgreSQL: " + ", ".join(missing_database_variables) + "."
+        )
     DATABASES = {"default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ["POSTGRES_DB"],
+        "NAME": POSTGRES_DB,
         "USER": os.environ["POSTGRES_USER"],
         "PASSWORD": os.environ["POSTGRES_PASSWORD"],
         "HOST": os.getenv("POSTGRES_HOST", "localhost"),
         "PORT": os.getenv("POSTGRES_PORT", "5432"),
+        "OPTIONS": {
+            "sslmode": os.getenv("POSTGRES_SSLMODE", "require" if IS_VERCEL else "prefer"),
+        },
+        "CONN_MAX_AGE": 0,
     }}
 else:
-    DATABASES = {"default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": os.getenv("PRICING_SQLITE_PATH", BASE_DIR / "db.sqlite3"),
-    }}
+    raise ImproperlyConfigured(
+        "PostgreSQL é obrigatório. Configure DATABASE_URL, POSTGRES_URL ou as variáveis POSTGRES_*."
+    )
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator", "OPTIONS": {"min_length": 12}},
@@ -201,8 +214,6 @@ if not DEBUG:
         raise ImproperlyConfigured("Defina PRICING_ADMIN_PATH específico para produção.")
     if DJANGO_TRUST_LOCAL_PROXY or IS_VERCEL:
         SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-    if not DATABASE_URL:
-        DATABASES["default"]["OPTIONS"] = {"sslmode": os.getenv("POSTGRES_SSLMODE", "prefer")}
     MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware")
     INSTALLED_APPS[0] = "project.admin_apps.ProtectedAdminConfig"
 OTP_TOTP_ISSUER = "Portal Pompeia"

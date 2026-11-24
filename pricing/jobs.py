@@ -6,7 +6,7 @@ from hashlib import sha256
 from time import monotonic
 
 from django.conf import settings
-from django.db import connection, transaction
+from django.db import transaction
 from django.db.models import F, Q
 from django.utils import timezone
 
@@ -158,13 +158,12 @@ def claim_job():
     candidates = CollectionJob.objects.filter(status=Status.PENDING, available_at__lte=now).order_by(
         F("run_id").asc(nulls_first=True), "available_at", "pk"
     )
-    lock_options = {"skip_locked": True, "of": ("self",)} if connection.vendor == "postgresql" else {}
     network_order = list(Store.objects.filter(active=True).order_by("retailer").values_list("retailer", flat=True).distinct())
     for retailer in dict.fromkeys(network_order):
         network, _ = NetworkHealth.objects.select_for_update().get_or_create(retailer=retailer)
         if CollectionJob.objects.filter(status=Status.RUNNING, store__retailer=retailer).exists():
             continue
-        job = candidates.filter(store__retailer=retailer).select_for_update(**lock_options).first()
+        job = candidates.filter(store__retailer=retailer).select_for_update(skip_locked=True, of=("self",)).first()
         if job is None:
             continue
         job.status = Status.RUNNING

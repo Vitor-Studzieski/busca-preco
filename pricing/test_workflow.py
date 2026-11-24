@@ -5,7 +5,7 @@ from zoneinfo import ZoneInfo
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
-from django.db import DatabaseError, IntegrityError, connection, transaction
+from django.db import DatabaseError, IntegrityError, transaction
 from django.test import Client, TestCase
 from django.urls import reverse
 from django.utils import timezone
@@ -113,8 +113,6 @@ class WorkflowTests(TestCase):
         self.assertEqual(AuditLog.objects.filter(action__startswith="price.").count(), 2)
 
     def test_postgres_exclusion_and_immutable_audit(self):
-        if connection.vendor != "postgresql":
-            self.skipTest("Invariantes exclusivos do PostgreSQL")
         product = Product.objects.create(sku="constraint", name="Detergente", package="500 ml")
         record = OwnPrice.objects.create(product=product, buyer=self.user, kind="regular",
                                          amount="10.00", starts_at=timezone.now())

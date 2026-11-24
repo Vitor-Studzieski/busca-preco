@@ -2,7 +2,7 @@
 
 Portal interno para dois compradores pesquisarem preços no Super Líder de Pompéia e Herculândia, Tauste de Marília e Confiança de Marília. A pesquisa abre com o último preço confirmado no banco e atualiza cada unidade em segundo plano. A primeira fase usa dados dos concorrentes. O catálogo e os preços do Pompeia entram em uma etapa posterior.
 
-- [Operação, implantação no escritório e migração de dados](docs/runbook.md)
+- [Operação e migração](docs/runbook.md)
 - [Implantação na Vercel](docs/deploy-vercel.md)
 - [Auditoria](docs/auditoria.md)
 - [Avaliação e plano incremental](docs/melhorias-radar-precos.md)
@@ -11,24 +11,26 @@ Portal interno para dois compradores pesquisarem preços no Super Líder de Pomp
 - [Segurança](docs/seguranca.md)
 - [Arquitetura da fila](docs/adr/0001-portal-e-fila.md)
 - [Sessões persistentes](docs/adr/0002-sessoes.md)
+- [Arquitetura PostgreSQL e Vercel](docs/adr/0003-postgresql-vercel.md)
 
 ## Ambiente de desenvolvimento
 
-Use Python 3.13 ou 3.14. PostgreSQL e Redis são obrigatórios no perfil de produção. Em desenvolvimento, o Django aceita a base SQLite local para compatibilidade com a instalação anterior.
+O Compose usa Python 3.13, PostgreSQL e Redis. Ele aplica as migrations e inicia o portal e o worker automaticamente. O banco começa novo; os dados do SQLite antigo não são importados.
 
-```sh
-python3 -m venv .venv
-source .venv/bin/activate
-pip install --require-hashes -r requirements.txt
-export DJANGO_SECRET_KEY="$(python -c 'from secrets import token_urlsafe; print(token_urlsafe(64))')"
-python manage.py migrate
-python manage.py runserver 127.0.0.1:8000
-```
+Com o Docker Desktop aberto, execute na pasta do projeto:
 
-Abra [o portal local](http://127.0.0.1:8000/). Execute `python manage.py collection_worker` em outro terminal com a mesma configuração de banco para processar as coletas. A opção de manter a sessão funciona entre reinícios quando a mesma chave de desenvolvimento é fornecida pelo ambiente. Em produção use a configuração do [runbook](docs/runbook.md).
+    docker compose -f compose.dev.yaml up --build --wait
 
-```sh
-python manage.py check
-python manage.py test
-python manage.py makemigrations --check --dry-run
-```
+Abra [o portal local](http://127.0.0.1:8000/). Na primeira inicialização, crie uma conta administrativa:
+
+    docker compose -f compose.dev.yaml exec web python manage.py createsuperuser
+
+Depois de entrar, cadastre os compradores pela opção de cadastro do portal. Para acompanhar os logs:
+
+    docker compose -f compose.dev.yaml logs -f web worker
+
+Para parar os serviços:
+
+    docker compose -f compose.dev.yaml down
+
+O volume do PostgreSQL continua disponível na próxima inicialização. O arquivo db.sqlite3 local não é usado pela aplicação.

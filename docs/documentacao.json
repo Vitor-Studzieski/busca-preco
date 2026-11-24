@@ -1,11 +1,11 @@
 {
   "titulo": "Portal de precificação do Supermercado Pompeia",
-  "versao": "2.1",
+  "versao": "2.2",
   "data": "2026-11-24",
   "escopo": {
     "publico": "Dois compradores autorizados",
     "primeira_fase": "Pesquisa e pré-coleta de preços dos concorrentes",
-    "ambiente_previsto": "Servidor local com acesso restrito ao escritório",
+    "ambiente_previsto": "Vercel com Django Functions, PostgreSQL, Redis e worker em Daemon; Compose para desenvolvimento local",
     "catalogo_pompeia": "Integração futura. CSV ainda indisponível. PRICING_ENABLE_OWN_PRICES desativado por padrão.",
     "separacao_de_perfis": "Portal de compradores e manutenção técnica restrita"
   },
@@ -54,11 +54,12 @@
   },
   "infraestrutura": {
     "aplicacao": "Monolito Django com módulos de portal, acesso, coletores, seletores, fila e preços próprios",
-    "producao": "PostgreSQL e Redis obrigatórios, Gunicorn, configuração Caddy e Docker Compose",
-    "compatibilidade_local": "SQLite para desenvolvimento e testes rápidos",
-    "fila": "Jobs persistentes em PostgreSQL, um job em execução por rede, worker com até três threads",
+    "producao": "Django no runtime Python da Vercel, PostgreSQL e Redis externos, worker collection_worker em Vercel Daemon (beta)",
+    "compatibilidade_local": "PostgreSQL e Redis locais; base nova sem importação do SQLite",
+    "fila": "Jobs persistentes em PostgreSQL, worker em Daemon com uma instância e até três threads",
     "isolamento_frontend": "O request GET da pesquisa consulta somente o banco. A atualização é enfileirada via POST e acompanhada por polling autenticado.",
-    "validacao": "Compose provado em rede Docker isolada com PostgreSQL, Redis, worker e web. Instalação do escritório pendente."
+    "validacao": "Compose provado em rede Docker isolada com PostgreSQL, Redis, worker e web. Instalação do escritório pendente.",
+    "transferencia": "PostgreSQL começa sem contas ou histórico do SQLite; migrations cadastram as quatro lojas monitoradas"
   },
   "modelo": {
     "cadastro_original": [
@@ -95,9 +96,10 @@
       "0008_limites_compartilhados",
       "0009_origem_do_produto",
       "0010_pre_coleta_de_pesquisas",
-      "0011_busca_cacheada"
+      "0011_busca_cacheada",
+      "0012_logos_oficiais"
     ],
-    "transferencia": "Comando migrate_catalog_database com cópia SQLite, contagem e checksum antes/depois. Rodar em PostgreSQL destino vazio."
+    "transferencia": "Dados de SQLite não são importados; contas são provisionadas no PostgreSQL novo."
   },
   "controle_de_acesso": {
     "compradores": "Provisionamento por comando create_buyer e limite de duas contas compradoras na configuração de produção",

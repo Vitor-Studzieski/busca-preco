@@ -12,11 +12,11 @@ Para parar os processos use `docker compose stop`, que preserva volumes. Para um
 
 ## Dados e reversão
 
-Faça backup do SQLite antes de mudar a base local, usando a API de backup do SQLite em modo somente leitura. O arquivo de validação deve ter acesso restrito. Em PostgreSQL use `pg_dump -Fc`, criptografe o arquivo com a chave de backup da empresa e valide a restauração em uma base isolada antes de autorizar um corte. Defina responsável, custódia de chave e retenção com o escritório.
+A implantação começa com um PostgreSQL novo. As migrations criam o schema e cadastram as quatro lojas; contas, fila, alertas e sessões começam vazios. O SQLite local não é lido nem importado pela aplicação. Provisione a conta técnica com createsuperuser e os compradores com create_buyer no ambiente que tiver acesso seguro ao banco. Para a Vercel, siga o [guia de implantação](deploy-vercel.md).
 
-Para transferir o catálogo legado, migre **uma cópia** do SQLite e a base PostgreSQL de destino para a mesma versão. Com a conexão PostgreSQL configurada, rode `python manage.py migrate_catalog_database CAMINHO_DA_COPIA`. O comando valida contagem e checksum, e reverte a transação quando divergem. Contas e permissões são preservadas. As sessões devem ser iniciadas novamente após a troca de banco.
+Em PostgreSQL use pg_dump -Fc, criptografe o arquivo com a chave de backup da empresa e valide a restauração em uma base isolada antes de autorizar um corte. Defina responsável, custódia de chave e retenção com o escritório.
 
-Para voltar ao código anterior antes do corte, reative a base anterior pelo backup e use a tag `baseline-portal-2026-11-24` em um checkout isolado. Migrations 0006–0011 têm reversão de schema, mas reverter removendo tabelas elimina os registros criados nelas. Se já houve uso na versão nova, preserve o banco novo, restaure em separado e reconcilie dados antes de voltar a servir escrita. Desativar o fluxo de preço próprio por configuração é a reversão preferida dessa função.
+Para voltar ao código anterior antes do corte, reative a base anterior pelo backup e use a tag baseline-portal-2026-11-24 em um checkout isolado. Migrations 0006–0011 têm reversão de schema, mas reverter removendo tabelas elimina os registros criados nelas. Se já houve uso na versão nova, preserve o banco novo, restaure em separado e reconcilie dados antes de voltar a servir escrita. Desativar o fluxo de preço próprio por configuração é a reversão preferida dessa função.
 
 ## Coleta e falhas
 
