@@ -9,7 +9,7 @@
   </div>
   <div class="current-price">
     <span>Preço vigente · Pompeia</span>
-    <strong>{% if product.current_price is not None %}R$ {{ product.current_price|floatformat:2 }}{% else %}A cadastrar{% endif %}</strong>
+    <strong>{% if amount is not None %}R$ {{ amount|floatformat:2 }}{% else %}A cadastrar{% endif %}</strong>
   </div>
 </section>
 <div class="product-grid">
@@ -52,6 +52,30 @@
       </table>
     </div>
   </section>
+  {% if can_draft and own_enabled %}
+    <section class="panel draft" aria-labelledby="publish-title">
+      <h2 id="publish-title">Publicar preço no portal</h2>
+      {% if publish_ready %}
+      <form method="post" action="{% url 'pricing:publish' product.pk %}">
+        {% csrf_token %}{{ publish_form.as_p }}
+        <button class="primary" type="submit">Publicar preço</button>
+      </form>
+      {% else %}<p class="muted">Aguardando preço comparável coletado hoje em cada unidade ativa. Você pode salvar um rascunho.</p>{% endif %}
+      {% if own_prices %}
+      <h3>Histórico de preços próprios</h3>
+      <ul class="draft-list">{% for own in own_prices %}
+        <li><strong>R$ {{ own.amount|floatformat:2 }} · {{ own.get_kind_display }}</strong>
+        <small>{{ own.starts_at|date:'d/m/Y H:i' }}{% if own.ends_at %} até {{ own.ends_at|date:'d/m/Y H:i' }}{% endif %}{% if own.cancelled_at %} · Cancelado{% endif %}</small>
+        {% if own.buyer_id == user.pk and not own.cancelled_at %}
+        <form method="post" action="{% url 'pricing:cancel_price' product.pk own.pk %}">{% csrf_token %}
+          <label for="cancel-{{ own.pk }}">Motivo do cancelamento</label><input id="cancel-{{ own.pk }}" name="reason" required maxlength="500">
+          <button type="submit">Cancelar preço</button>
+        </form>
+        {% endif %}</li>
+      {% endfor %}</ul>
+      {% endif %}
+    </section>
+  {% endif %}
   {% if can_draft %}
     <section class="panel draft" aria-labelledby="draft-title">
       <h2 id="draft-title">Propor preço</h2>

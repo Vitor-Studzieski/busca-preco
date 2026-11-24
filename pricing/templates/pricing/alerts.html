@@ -1,0 +1,14 @@
+{% extends 'pricing/base.html' %}
+{% block title %}Alertas{% endblock %}
+{% block content %}
+<h1>Alertas</h1>
+<ul class="panel work-panel flat-list">
+  {% for row in rows %}
+  <li class="work-actions">
+    <div><strong>{{ row.detail }}</strong><small>{{ row.opened_at|date:'d/m/Y H:i' }}{% if row.product %} · {{ row.product.name }}{% endif %}{% if row.listing %} · {{ row.listing.store }}{% endif %}</small></div>
+    {% if row.id in acknowledged %}<small>Reconhecido por você</small>
+    {% else %}<form method="post" action="{% url 'pricing:acknowledge' row.pk %}">{% csrf_token %}<button type="submit">Reconhecer</button></form>{% endif %}
+  </li>
+  {% empty %}<li>Nenhum alerta aberto.</li>{% endfor %}
+</ul>
+{% endblock %}

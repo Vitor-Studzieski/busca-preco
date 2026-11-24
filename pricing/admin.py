@@ -2,6 +2,7 @@ from django.contrib import admin
 
 from .forms import ListingForm, ProductForm
 from .models import Listing, PriceDraft, Product, Store
+from .workflow_models import AlertRule, SearchAlias
 
 
 @admin.register(Product)
@@ -54,3 +55,6 @@ class PriceDraftAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+admin.site.register(AlertRule)
+admin.site.register(SearchAlias)

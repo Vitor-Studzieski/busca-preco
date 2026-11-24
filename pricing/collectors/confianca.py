@@ -1,12 +1,11 @@
-from datetime import datetime, timezone
-from decimal import Decimal
 import json
 import re
+from datetime import datetime, timezone
+from decimal import Decimal
 from urllib.parse import parse_qs, unquote, urlsplit
 
 from .extract import CollectedOffer, clean_text, extract_code, extract_gtin, extract_price
 from .http import CONFIANCA_PRODUCT_PATH, CollectionError
-
 
 STATE_PREFIX = re.compile(r"\bwindow\.state\s*=\s*JSON\.parse\(\s*decodeURI\(\s*")
 PUBLIC_LIST = "DefaultPriceListEsmeralda"

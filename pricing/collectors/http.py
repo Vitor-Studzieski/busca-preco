@@ -1,12 +1,15 @@
+import re
+import socket
 from collections.abc import Callable
 from contextlib import contextmanager
 from contextvars import ContextVar
-from http.client import HTTPException
+from http.client import HTTPException, HTTPSConnection
+from ipaddress import ip_address
+from threading import Lock
 from time import monotonic, sleep
 from urllib.error import HTTPError
 from urllib.parse import quote, unquote, urlsplit, urlunsplit
-from urllib.request import HTTPRedirectHandler, ProxyHandler, Request, build_opener
-import re
+from urllib.request import HTTPRedirectHandler, HTTPSHandler, ProxyHandler, Request, build_opener
 
 
 class CollectionError(ValueError):
@@ -36,6 +39,56 @@ STOREFRONTS = {
 }
 MAX_RESPONSE_BYTES = 8 * 1024 * 1024
 DEADLINE = ContextVar("market_deadline", default=None)
+LAST_REQUEST = {}
+REQUEST_LOCK = Lock()
+
+
+def pace_http(host, deadline):
+    with REQUEST_LOCK:
+        now = monotonic()
+        earliest = LAST_REQUEST.get(host, now)
+        if deadline is not None and earliest >= deadline:
+            raise CollectionError("A loja não respondeu no tempo disponível.", temporary=True)
+        delay = max(0, earliest - now)
+        LAST_REQUEST[host] = now + delay + 0.2
+    if delay:
+        sleep(delay)
+
+
+def connect_public(address, timeout=None, source_address=None):
+    host, port = address
+    resolved = socket.getaddrinfo(host, port, type=socket.SOCK_STREAM)
+    if not resolved or any(not ip_address(row[4][0].split("%")[0]).is_global for row in resolved):
+        raise CollectionError("O endereço da loja não resolveu para um destino público.")
+    failure = None
+    for family, kind, protocol, _, target in resolved:
+        sock = socket.socket(family, kind, protocol)
+        try:
+            deadline = DEADLINE.get()
+            sock.settimeout(timeout if deadline is None else min(timeout, remaining_time(deadline)))
+            if source_address:
+                sock.bind(source_address)
+            sock.connect(target)
+            return sock
+        except OSError as error:
+            sock.close()
+            failure = error
+        except CollectionError:
+            sock.close()
+            raise
+    raise failure or OSError("Endereço de loja indisponível")
+
+
+class PublicHTTPSConnection(HTTPSConnection):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._create_connection = connect_public
+
+
+class PublicHTTPSHandler(HTTPSHandler):
+    def https_open(self, req):
+        return self.do_open(PublicHTTPSConnection, req, context=self._context)
+
 
 
 @contextmanager
@@ -137,7 +190,7 @@ class StorefrontRedirectHandler(HTTPRedirectHandler):
 def fetch_html(page_url: str, validate_url: Callable[[str], str]) -> tuple[str, str]:
     page_url = validate_url(page_url)
     deadline = DEADLINE.get()
-    opener = build_opener(ProxyHandler({}), StorefrontRedirectHandler(validate_url))
+    opener = build_opener(ProxyHandler({}), StorefrontRedirectHandler(validate_url), PublicHTTPSHandler())
     request = Request(
         page_url,
         headers={"Accept": "text/html", "User-Agent": "Pompeia-PriceMonitor/0.1"},
@@ -153,6 +206,7 @@ def fetch_html(page_url: str, validate_url: Callable[[str], str]) -> tuple[str, 
 
 
 def open_html(opener, request, validate_url, deadline):
+    pace_http(urlsplit(request.full_url).hostname, deadline)
     timeout = 12 if deadline is None else min(5, remaining_time(deadline))
     try:
         with opener.open(request, timeout=timeout) as response:

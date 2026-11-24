@@ -1,0 +1,931 @@
+{
+  "amostras": [
+    {
+      "consulta": "arroz 5 kg",
+      "tempo_s": 11.371,
+      "unidades": [
+        {
+          "unidade": "lider-pompeia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        },
+        {
+          "unidade": "lider-herculandia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        },
+        {
+          "unidade": "tauste-marilia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 2,
+          "motivo": ""
+        },
+        {
+          "unidade": "confianca-marilia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        }
+      ]
+    },
+    {
+      "consulta": "feijao carioca 1 kg",
+      "tempo_s": 12.005,
+      "unidades": [
+        {
+          "unidade": "lider-pompeia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        },
+        {
+          "unidade": "lider-herculandia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        },
+        {
+          "unidade": "tauste-marilia",
+          "estado": "timeout",
+          "ofertas_confirmadas": 0,
+          "motivo": "A loja não respondeu no tempo disponível."
+        },
+        {
+          "unidade": "confianca-marilia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        }
+      ]
+    },
+    {
+      "consulta": "cafe 500 g",
+      "tempo_s": 10.925,
+      "unidades": [
+        {
+          "unidade": "lider-pompeia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        },
+        {
+          "unidade": "lider-herculandia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        },
+        {
+          "unidade": "tauste-marilia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        },
+        {
+          "unidade": "confianca-marilia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        }
+      ]
+    },
+    {
+      "consulta": "leite integral 1 l",
+      "tempo_s": 10.395,
+      "unidades": [
+        {
+          "unidade": "lider-pompeia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        },
+        {
+          "unidade": "lider-herculandia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        },
+        {
+          "unidade": "tauste-marilia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        },
+        {
+          "unidade": "confianca-marilia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        }
+      ]
+    },
+    {
+      "consulta": "coca cola 2 l",
+      "tempo_s": 12.005,
+      "unidades": [
+        {
+          "unidade": "lider-pompeia",
+          "estado": "timeout",
+          "ofertas_confirmadas": 0,
+          "motivo": "A loja não respondeu no tempo disponível."
+        },
+        {
+          "unidade": "lider-herculandia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        },
+        {
+          "unidade": "tauste-marilia",
+          "estado": "timeout",
+          "ofertas_confirmadas": 0,
+          "motivo": "A loja não respondeu no tempo disponível."
+        },
+        {
+          "unidade": "confianca-marilia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 2,
+          "motivo": ""
+        }
+      ]
+    },
+    {
+      "consulta": "detergente ype 500 ml",
+      "tempo_s": 12.004,
+      "unidades": [
+        {
+          "unidade": "lider-pompeia",
+          "estado": "timeout",
+          "ofertas_confirmadas": 0,
+          "motivo": "A loja não respondeu no tempo disponível."
+        },
+        {
+          "unidade": "lider-herculandia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        },
+        {
+          "unidade": "tauste-marilia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        },
+        {
+          "unidade": "confianca-marilia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        }
+      ]
+    },
+    {
+      "consulta": "oleo soja 900 ml",
+      "tempo_s": 12.005,
+      "unidades": [
+        {
+          "unidade": "lider-pompeia",
+          "estado": "timeout",
+          "ofertas_confirmadas": 0,
+          "motivo": "A loja não respondeu no tempo disponível."
+        },
+        {
+          "unidade": "lider-herculandia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        },
+        {
+          "unidade": "tauste-marilia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 2,
+          "motivo": ""
+        },
+        {
+          "unidade": "confianca-marilia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        }
+      ]
+    },
+    {
+      "consulta": "acucar 1 kg",
+      "tempo_s": 12.005,
+      "unidades": [
+        {
+          "unidade": "lider-pompeia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        },
+        {
+          "unidade": "lider-herculandia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        },
+        {
+          "unidade": "tauste-marilia",
+          "estado": "timeout",
+          "ofertas_confirmadas": 0,
+          "motivo": "A loja não respondeu no tempo disponível."
+        },
+        {
+          "unidade": "confianca-marilia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        }
+      ]
+    },
+    {
+      "consulta": "sal 1 kg",
+      "tempo_s": 12.005,
+      "unidades": [
+        {
+          "unidade": "lider-pompeia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        },
+        {
+          "unidade": "lider-herculandia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        },
+        {
+          "unidade": "tauste-marilia",
+          "estado": "timeout",
+          "ofertas_confirmadas": 0,
+          "motivo": "A loja não respondeu no tempo disponível."
+        },
+        {
+          "unidade": "confianca-marilia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        }
+      ]
+    },
+    {
+      "consulta": "farinha trigo 1 kg",
+      "tempo_s": 11.48,
+      "unidades": [
+        {
+          "unidade": "lider-pompeia",
+          "estado": "nao_encontrado",
+          "ofertas_confirmadas": 0,
+          "motivo": ""
+        },
+        {
+          "unidade": "lider-herculandia",
+          "estado": "nao_encontrado",
+          "ofertas_confirmadas": 0,
+          "motivo": ""
+        },
+        {
+          "unidade": "tauste-marilia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        },
+        {
+          "unidade": "confianca-marilia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        }
+      ]
+    },
+    {
+      "consulta": "contra file kg",
+      "tempo_s": 6.714,
+      "unidades": [
+        {
+          "unidade": "lider-pompeia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 1,
+          "motivo": ""
+        },
+        {
+          "unidade": "lider-herculandia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 1,
+          "motivo": ""
+        },
+        {
+          "unidade": "tauste-marilia",
+          "estado": "nao_encontrado",
+          "ofertas_confirmadas": 0,
+          "motivo": ""
+        },
+        {
+          "unidade": "confianca-marilia",
+          "estado": "nao_encontrado",
+          "ofertas_confirmadas": 0,
+          "motivo": ""
+        }
+      ]
+    },
+    {
+      "consulta": "banana prata kg",
+      "tempo_s": 6.281,
+      "unidades": [
+        {
+          "unidade": "lider-pompeia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 1,
+          "motivo": ""
+        },
+        {
+          "unidade": "lider-herculandia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 1,
+          "motivo": ""
+        },
+        {
+          "unidade": "tauste-marilia",
+          "estado": "nao_encontrado",
+          "ofertas_confirmadas": 0,
+          "motivo": ""
+        },
+        {
+          "unidade": "confianca-marilia",
+          "estado": "nao_encontrado",
+          "ofertas_confirmadas": 0,
+          "motivo": ""
+        }
+      ]
+    },
+    {
+      "consulta": "tomate kg",
+      "tempo_s": 5.984,
+      "unidades": [
+        {
+          "unidade": "lider-pompeia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 1,
+          "motivo": ""
+        },
+        {
+          "unidade": "lider-herculandia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 1,
+          "motivo": ""
+        },
+        {
+          "unidade": "tauste-marilia",
+          "estado": "nao_encontrado",
+          "ofertas_confirmadas": 0,
+          "motivo": ""
+        },
+        {
+          "unidade": "confianca-marilia",
+          "estado": "nao_encontrado",
+          "ofertas_confirmadas": 0,
+          "motivo": ""
+        }
+      ]
+    },
+    {
+      "consulta": "batata kg",
+      "tempo_s": 9.925,
+      "unidades": [
+        {
+          "unidade": "lider-pompeia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 2,
+          "motivo": ""
+        },
+        {
+          "unidade": "lider-herculandia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        },
+        {
+          "unidade": "tauste-marilia",
+          "estado": "nao_encontrado",
+          "ofertas_confirmadas": 0,
+          "motivo": ""
+        },
+        {
+          "unidade": "confianca-marilia",
+          "estado": "nao_encontrado",
+          "ofertas_confirmadas": 0,
+          "motivo": ""
+        }
+      ]
+    },
+    {
+      "consulta": "cebola kg",
+      "tempo_s": 10.469,
+      "unidades": [
+        {
+          "unidade": "lider-pompeia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        },
+        {
+          "unidade": "lider-herculandia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 2,
+          "motivo": ""
+        },
+        {
+          "unidade": "tauste-marilia",
+          "estado": "nao_encontrado",
+          "ofertas_confirmadas": 0,
+          "motivo": ""
+        },
+        {
+          "unidade": "confianca-marilia",
+          "estado": "nao_encontrado",
+          "ofertas_confirmadas": 0,
+          "motivo": ""
+        }
+      ]
+    },
+    {
+      "consulta": "cerveja heineken 600 ml",
+      "tempo_s": 13.692,
+      "unidades": [
+        {
+          "unidade": "lider-pompeia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 1,
+          "motivo": ""
+        },
+        {
+          "unidade": "lider-herculandia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 1,
+          "motivo": ""
+        },
+        {
+          "unidade": "tauste-marilia",
+          "estado": "nao_encontrado",
+          "ofertas_confirmadas": 0,
+          "motivo": ""
+        },
+        {
+          "unidade": "confianca-marilia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 1,
+          "motivo": ""
+        }
+      ]
+    },
+    {
+      "consulta": "papel higienico 4 rolos",
+      "tempo_s": 12.003,
+      "unidades": [
+        {
+          "unidade": "lider-pompeia",
+          "estado": "nao_encontrado",
+          "ofertas_confirmadas": 0,
+          "motivo": ""
+        },
+        {
+          "unidade": "lider-herculandia",
+          "estado": "nao_encontrado",
+          "ofertas_confirmadas": 0,
+          "motivo": ""
+        },
+        {
+          "unidade": "tauste-marilia",
+          "estado": "timeout",
+          "ofertas_confirmadas": 0,
+          "motivo": "A loja não respondeu no tempo disponível."
+        },
+        {
+          "unidade": "confianca-marilia",
+          "estado": "nao_encontrado",
+          "ofertas_confirmadas": 0,
+          "motivo": ""
+        }
+      ]
+    },
+    {
+      "consulta": "manteiga 200 g",
+      "tempo_s": 10.362,
+      "unidades": [
+        {
+          "unidade": "lider-pompeia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        },
+        {
+          "unidade": "lider-herculandia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        },
+        {
+          "unidade": "tauste-marilia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        },
+        {
+          "unidade": "confianca-marilia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        }
+      ]
+    },
+    {
+      "consulta": "macarrao 500 g",
+      "tempo_s": 12.001,
+      "unidades": [
+        {
+          "unidade": "lider-pompeia",
+          "estado": "nao_encontrado",
+          "ofertas_confirmadas": 0,
+          "motivo": ""
+        },
+        {
+          "unidade": "lider-herculandia",
+          "estado": "nao_encontrado",
+          "ofertas_confirmadas": 0,
+          "motivo": ""
+        },
+        {
+          "unidade": "tauste-marilia",
+          "estado": "timeout",
+          "ofertas_confirmadas": 0,
+          "motivo": "A loja não respondeu no tempo disponível."
+        },
+        {
+          "unidade": "confianca-marilia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        }
+      ]
+    },
+    {
+      "consulta": "biscoito 200 g",
+      "tempo_s": 12.005,
+      "unidades": [
+        {
+          "unidade": "lider-pompeia",
+          "estado": "timeout",
+          "ofertas_confirmadas": 0,
+          "motivo": "A loja não respondeu no tempo disponível."
+        },
+        {
+          "unidade": "lider-herculandia",
+          "estado": "timeout",
+          "ofertas_confirmadas": 0,
+          "motivo": "A loja não respondeu no tempo disponível."
+        },
+        {
+          "unidade": "tauste-marilia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        },
+        {
+          "unidade": "confianca-marilia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        }
+      ]
+    },
+    {
+      "consulta": "iogurte 170 g",
+      "tempo_s": 12.004,
+      "unidades": [
+        {
+          "unidade": "lider-pompeia",
+          "estado": "timeout",
+          "ofertas_confirmadas": 0,
+          "motivo": "A loja não respondeu no tempo disponível."
+        },
+        {
+          "unidade": "lider-herculandia",
+          "estado": "timeout",
+          "ofertas_confirmadas": 0,
+          "motivo": "A loja não respondeu no tempo disponível."
+        },
+        {
+          "unidade": "tauste-marilia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        },
+        {
+          "unidade": "confianca-marilia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        }
+      ]
+    },
+    {
+      "consulta": "sabao em po 1 kg",
+      "tempo_s": 13.497,
+      "unidades": [
+        {
+          "unidade": "lider-pompeia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 1,
+          "motivo": ""
+        },
+        {
+          "unidade": "lider-herculandia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 1,
+          "motivo": ""
+        },
+        {
+          "unidade": "tauste-marilia",
+          "estado": "erro",
+          "ofertas_confirmadas": 0,
+          "motivo": "O site não confirmou a busca na unidade selecionada."
+        },
+        {
+          "unidade": "confianca-marilia",
+          "estado": "nao_encontrado",
+          "ofertas_confirmadas": 0,
+          "motivo": ""
+        }
+      ]
+    },
+    {
+      "consulta": "amaciante 2 l",
+      "tempo_s": 11.365,
+      "unidades": [
+        {
+          "unidade": "lider-pompeia",
+          "estado": "nao_encontrado",
+          "ofertas_confirmadas": 0,
+          "motivo": ""
+        },
+        {
+          "unidade": "lider-herculandia",
+          "estado": "nao_encontrado",
+          "ofertas_confirmadas": 0,
+          "motivo": ""
+        },
+        {
+          "unidade": "tauste-marilia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        },
+        {
+          "unidade": "confianca-marilia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        }
+      ]
+    },
+    {
+      "consulta": "levite integral 1 l",
+      "tempo_s": 12.004,
+      "unidades": [
+        {
+          "unidade": "lider-pompeia",
+          "estado": "timeout",
+          "ofertas_confirmadas": 0,
+          "motivo": "A loja não respondeu no tempo disponível."
+        },
+        {
+          "unidade": "lider-herculandia",
+          "estado": "nao_encontrado",
+          "ofertas_confirmadas": 0,
+          "motivo": ""
+        },
+        {
+          "unidade": "tauste-marilia",
+          "estado": "nao_encontrado",
+          "ofertas_confirmadas": 0,
+          "motivo": ""
+        },
+        {
+          "unidade": "confianca-marilia",
+          "estado": "nao_encontrado",
+          "ofertas_confirmadas": 0,
+          "motivo": ""
+        }
+      ]
+    },
+    {
+      "consulta": "cerv 350 ml",
+      "tempo_s": 10.897,
+      "unidades": [
+        {
+          "unidade": "lider-pompeia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        },
+        {
+          "unidade": "lider-herculandia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        },
+        {
+          "unidade": "tauste-marilia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        },
+        {
+          "unidade": "confianca-marilia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        }
+      ]
+    },
+    {
+      "consulta": "refrig cola zero 2 l",
+      "tempo_s": 10.803,
+      "unidades": [
+        {
+          "unidade": "lider-pompeia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        },
+        {
+          "unidade": "lider-herculandia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 2,
+          "motivo": ""
+        },
+        {
+          "unidade": "tauste-marilia",
+          "estado": "nao_encontrado",
+          "ofertas_confirmadas": 0,
+          "motivo": ""
+        },
+        {
+          "unidade": "confianca-marilia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 2,
+          "motivo": ""
+        }
+      ]
+    },
+    {
+      "consulta": "detg liq ype 500 ml",
+      "tempo_s": 10.239,
+      "unidades": [
+        {
+          "unidade": "lider-pompeia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        },
+        {
+          "unidade": "lider-herculandia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        },
+        {
+          "unidade": "tauste-marilia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        },
+        {
+          "unidade": "confianca-marilia",
+          "estado": "confirmado",
+          "ofertas_confirmadas": 3,
+          "motivo": ""
+        }
+      ]
+    },
+    {
+      "consulta": "7894900011517",
+      "tempo_s": 2.553,
+      "unidades": [
+        {
+          "unidade": "lider-pompeia",
+          "estado": "nao_encontrado",
+          "ofertas_confirmadas": 0,
+          "motivo": ""
+        },
+        {
+          "unidade": "lider-herculandia",
+          "estado": "nao_encontrado",
+          "ofertas_confirmadas": 0,
+          "motivo": ""
+        },
+        {
+          "unidade": "tauste-marilia",
+          "estado": "nao_encontrado",
+          "ofertas_confirmadas": 0,
+          "motivo": ""
+        },
+        {
+          "unidade": "confianca-marilia",
+          "estado": "nao_encontrado",
+          "ofertas_confirmadas": 0,
+          "motivo": ""
+        }
+      ]
+    },
+    {
+      "consulta": "00000757",
+      "tempo_s": 2.212,
+      "unidades": [
+        {
+          "unidade": "lider-pompeia",
+          "estado": "nao_encontrado",
+          "ofertas_confirmadas": 0,
+          "motivo": ""
+        },
+        {
+          "unidade": "lider-herculandia",
+          "estado": "nao_encontrado",
+          "ofertas_confirmadas": 0,
+          "motivo": ""
+        },
+        {
+          "unidade": "tauste-marilia",
+          "estado": "nao_encontrado",
+          "ofertas_confirmadas": 0,
+          "motivo": ""
+        },
+        {
+          "unidade": "confianca-marilia",
+          "estado": "nao_encontrado",
+          "ofertas_confirmadas": 0,
+          "motivo": ""
+        }
+      ]
+    },
+    {
+      "consulta": "7891000100103",
+      "tempo_s": 2.101,
+      "unidades": [
+        {
+          "unidade": "lider-pompeia",
+          "estado": "nao_encontrado",
+          "ofertas_confirmadas": 0,
+          "motivo": ""
+        },
+        {
+          "unidade": "lider-herculandia",
+          "estado": "nao_encontrado",
+          "ofertas_confirmadas": 0,
+          "motivo": ""
+        },
+        {
+          "unidade": "tauste-marilia",
+          "estado": "nao_encontrado",
+          "ofertas_confirmadas": 0,
+          "motivo": ""
+        },
+        {
+          "unidade": "confianca-marilia",
+          "estado": "nao_encontrado",
+          "ofertas_confirmadas": 0,
+          "motivo": ""
+        }
+      ]
+    }
+  ],
+  "tempo_total": {
+    "n": 30,
+    "p50_s": 11.368,
+    "p95_s": 13.497
+  },
+  "por_unidade": {
+    "confianca-marilia": {
+      "n": 30,
+      "p50_s": 4.874,
+      "p95_s": 10.18
+    },
+    "tauste-marilia": {
+      "n": 30,
+      "p50_s": 9.312,
+      "p95_s": 12.042
+    },
+    "lider-pompeia": {
+      "n": 30,
+      "p50_s": 10.538,
+      "p95_s": 12.386
+    },
+    "lider-herculandia": {
+      "n": 30,
+      "p50_s": 10.029,
+      "p95_s": 12.011
+    }
+  }
+}

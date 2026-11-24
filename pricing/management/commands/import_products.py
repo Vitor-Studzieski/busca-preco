@@ -1,5 +1,6 @@
 import csv
 from decimal import Decimal, InvalidOperation
+from pathlib import Path
 
 from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand, CommandError
@@ -19,6 +20,8 @@ class Command(BaseCommand):
         count = 0
         seen_skus = set()
         try:
+            if Path(options["arquivo"]).stat().st_size > 25 * 1024 * 1024:
+                raise CommandError("O CSV excede o limite de 25 MiB.")
             with open(options["arquivo"], encoding="utf-8-sig", newline="") as source, transaction.atomic():
                 rows = csv.DictReader(source, delimiter=";", strict=True)
                 if not required.issubset(rows.fieldnames or []):

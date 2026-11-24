@@ -1,11 +1,11 @@
+import logging
+import re
 from concurrent.futures import ThreadPoolExecutor, wait
 from dataclasses import dataclass, replace
 from datetime import datetime
 from decimal import Decimal
 from hashlib import sha256
 from threading import Lock
-import logging
-import re
 from time import monotonic
 from urllib.parse import urlsplit
 
@@ -18,7 +18,6 @@ from .collectors.http import storefront_deadline
 from .collectors.search import search_catalog
 from .identifiers import normalize_gtin, search_text
 from .models import Observation, Store
-
 
 MEASURE = re.compile(
     r"(?<![a-z0-9])(\d+(?:[.,]\d+)?)\s*-?\s*"
@@ -47,7 +46,7 @@ pending_searches = {}
 pending_lock = Lock()
 
 
-def product_terms(value):
+def product_terms(value, aliases=None):
     normalized = search_text(value)
     normalized = re.sub(r"\b(?:zero|sem)\s+(acucar|alcool|lactose|gluten)\b", r"sem\1", normalized)
     measures = [("un", Decimal(count)) for count in MULTIPACK.findall(normalized)]
@@ -68,8 +67,9 @@ def product_terms(value):
             measures.append(("g", amount))
 
     raw = [word for word in WORDS.findall(MEASURE.sub(" ", normalized)) if word not in CONNECTORS]
+    aliases = ALIASES if aliases is None else ALIASES | aliases
     terms = [alias for word in raw for alias in (
-        (word,) if word == "coca" and "cola" in raw else ALIASES.get(word, (word,))
+        (word,) if word == "coca" and "cola" in raw else aliases.get(word, (word,))
     )]
     if "coca" in terms and "zero" in terms:
         terms = ["semacucar" if word == "zero" else word for word in terms]
@@ -99,8 +99,8 @@ class SearchQuery:
     code: str
 
     @classmethod
-    def from_text(cls, query):
-        terms, measures = product_terms(query)
+    def from_text(cls, query, aliases=None):
+        terms, measures = product_terms(query, aliases)
         return cls(terms, measures, query if query.isascii() and query.isdigit() else "")
 
     def candidate(self, name, *, detail=False):

@@ -10,7 +10,11 @@ from django.test import Client, SimpleTestCase, TestCase, override_settings
 from django.urls import reverse
 
 from .collectors.http import (
-    CollectionError, StorefrontRedirectHandler, fetch_html, storefront_deadline, validate_product_url,
+    CollectionError,
+    StorefrontRedirectHandler,
+    fetch_html,
+    storefront_deadline,
+    validate_product_url,
 )
 from .models import PriceDraft, Product
 
@@ -32,7 +36,9 @@ class RouteAccessTests(TestCase):
         self.client = Client(HTTP_HOST="localhost", enforce_csrf_checks=True)
 
     def test_visitor_buyer_and_administrator_access_routes_directly(self):
-        guarded_routes = [reverse("pricing:search"), self.detail, reverse("add_buyer"), reverse("logout")]
+        guarded_routes = [reverse("pricing:search"), self.detail, reverse("add_buyer"), reverse("logout"),
+                          reverse("pricing:day_queue"), reverse("pricing:alerts"), reverse("pricing:health"),
+                          reverse("pricing:progress"), reverse("pricing:suggestions"), reverse("buyer_devices")]
         for route in guarded_routes:
             self.assertEqual(self.client.get(route).status_code, 302, route)
         self.assertEqual(self.client.get(reverse("admin:index")).status_code, 302)
@@ -99,18 +105,22 @@ class RouteAccessTests(TestCase):
     @override_settings(PRICING_SEARCH_RATE_LIMIT=2)
     def test_search_returns_429_per_account_before_contacting_sources(self):
         self.client.force_login(self.buyer)
-        search = reverse("pricing:search")
-        with patch("pricing.views.search_stores", return_value=[]) as query, patch(
+        search = reverse("pricing:refresh")
+        self.client.get(reverse("login"))
+        self.client.get(reverse("pricing:search"))
+        def csrf():
+            return self.client.cookies["csrftoken"].value
+        with patch("pricing.portal.enqueue_search", return_value=[]) as query, patch(
                 "pricing.request_limits.time", return_value=10):
             for term in ("Heineken 600 ml", "Contra-filé"):
-                self.assertEqual(self.client.get(search, {"q": term}).status_code, 200)
-            blocked = self.client.get(search, {"q": "Coca-Cola 2 litros"})
+                self.assertEqual(self.client.post(search, {"q": term, "csrfmiddlewaretoken": csrf()}).status_code, 202)
+            blocked = self.client.post(search, {"q": "Coca-Cola 2 litros", "csrfmiddlewaretoken": csrf()})
             self.assertEqual(blocked.status_code, 429)
             self.assertEqual(blocked["Retry-After"], "50")
             self.assertIn("no-store", blocked["Cache-Control"])
             self.assertEqual(query.call_count, 2)
             self.client.force_login(self.admin)
-            self.assertEqual(self.client.get(search, {"q": "Coca-Cola 2 litros"}).status_code, 200)
+            self.assertEqual(self.client.post(search, {"q": "Coca-Cola 2 litros", "csrfmiddlewaretoken": csrf()}).status_code, 202)
 
 
 class StorefrontRouteTests(SimpleTestCase):

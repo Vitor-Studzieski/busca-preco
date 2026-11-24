@@ -14,6 +14,7 @@ class Product(models.Model):
     name = models.CharField("produto", max_length=255)
     package = models.CharField("embalagem", max_length=100)
     gtin = models.CharField("EAN/GTIN", max_length=14, blank=True, db_index=True)
+    active = models.BooleanField(default=True)
     search_name = models.CharField(max_length=420, editable=False)
     current_price = models.DecimalField("preço vigente", max_digits=12, decimal_places=2,
                                         null=True, blank=True,
@@ -52,6 +53,9 @@ class Store(models.Model):
     retailer = models.CharField("rede", max_length=20, choices=Retailer.choices)
     unit = models.CharField("unidade", max_length=80)
     url = models.URLField("endereço do catálogo", max_length=500)
+    active = models.BooleanField(default=True)
+    logo = models.CharField(max_length=180, blank=True)
+    display_order = models.PositiveSmallIntegerField(default=0)
 
     class Meta:
         ordering = ["pk"]
@@ -75,6 +79,9 @@ class Listing(models.Model):
 
     store = models.ForeignKey(Store, models.PROTECT, verbose_name="loja")
     url = models.URLField("URL pública do produto", max_length=500)
+    active = models.BooleanField(default=True)
+    confirmed_by = models.ForeignKey(settings.AUTH_USER_MODEL, models.PROTECT, null=True, blank=True)
+    confirmed_at = models.DateTimeField(null=True, blank=True)
     external_code = models.CharField("código no concorrente", max_length=120, blank=True,
                                      editable=False)
     name = models.CharField("descrição no concorrente", max_length=255, blank=True)
@@ -90,14 +97,17 @@ class Listing(models.Model):
                              editable=False)
 
     class Meta:
+        indexes = [models.Index(fields=["status", "checked_at"], name="listing_status_check_idx")]
         verbose_name = "anúncio monitorado"
         verbose_name_plural = "anúncios monitorados"
         constraints = [
+            models.CheckConstraint(condition=Q(status__in=("pending", "ok", "error", "conflict")),
+                                   name="listing_status_valid"),
             models.UniqueConstraint(fields=["store", "url"], name="listing_unique_store_url"),
             models.UniqueConstraint(fields=["store", "external_code"],
                                     condition=~Q(external_code=""),
                                     name="listing_unique_store_external_code"),
-            models.UniqueConstraint(fields=["store", "product"],
+            models.UniqueConstraint(fields=["store", "product"], condition=Q(active=True),
                                     name="listing_unique_store_product"),
         ]
 
@@ -121,7 +131,8 @@ class Observation(models.Model):
         UNAVAILABLE = "unavailable", "Indisponível"
         UNKNOWN = "unknown", "Estoque não informado"
 
-    listing = models.ForeignKey(Listing, models.CASCADE, related_name="observations")
+    listing = models.ForeignKey(Listing, models.PROTECT, related_name="observations")
+    collection_run = models.ForeignKey("pricing.CollectionRun", models.PROTECT, null=True, blank=True)
     price = models.DecimalField("preço observado", max_digits=12, decimal_places=2,
                                 validators=[MinValueValidator(Decimal("0.01"))])
     price_unit = models.CharField("unidade do preço", max_length=2, blank=True, default="")
@@ -138,6 +149,12 @@ class Observation(models.Model):
         indexes = [models.Index(fields=["listing", "-observed_at", "-id"],
                                  name="observation_latest_idx")]
         constraints = [
+            models.CheckConstraint(condition=Q(condition__in=("regular", "promotion", "club", "unknown")),
+                                   name="observation_condition_valid"),
+            models.CheckConstraint(condition=Q(availability__in=("available", "unavailable", "unknown")),
+                                   name="observation_availability_valid"),
+            models.UniqueConstraint(fields=["listing", "collection_run"],
+                                    condition=Q(collection_run__isnull=False), name="unique_run_observation"),
             models.CheckConstraint(condition=Q(price__gt=0), name="observation_price_positive"),
             models.CheckConstraint(
                 condition=Q(club_price__gt=0, club_price__lt=models.F("price")),
@@ -164,3 +181,7 @@ class PriceDraft(models.Model):
 
 class InitialAccountSetup(models.Model):
     completed_at = models.DateTimeField(auto_now_add=True)
+
+
+# Django registra estes modelos no mesmo app, preservando os nomes das tabelas existentes.
+from . import workflow_models  # noqa: E402, F401

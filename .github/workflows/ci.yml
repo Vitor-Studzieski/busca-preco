@@ -1,0 +1,42 @@
+name: Portal Django
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: test
+          POSTGRES_DB: pompeia
+          POSTGRES_PASSWORD: ci-temporario
+        ports: ["5432:5432"]
+        options: --health-cmd "pg_isready -U test" --health-interval 5s --health-timeout 5s --health-retries 8
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 5s --health-retries 8
+    env:
+      POSTGRES_DB: pompeia
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: ci-temporario
+      POSTGRES_HOST: 127.0.0.1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: pip install --require-hashes -r requirements.txt
+      - run: pip install 'ruff==0.17.6' 'bandit==1.9.4' 'pip-audit==2.10.1' 'coverage==7.13.4'
+      - run: ruff check .
+      - run: bandit -r pricing project -x 'pricing/test*,pricing/collectors/tests.py' -ll -ii
+      - run: pip-audit --require-hashes --disable-pip -r requirements.txt
+      - run: python manage.py makemigrations --check --dry-run
+      - run: coverage run --source=pricing,project manage.py test
+      - run: coverage report -m
+      - run: |
+          export DJANGO_SECRET_KEY="$(python -c 'from secrets import token_urlsafe; print(token_urlsafe(64))')"
+          DJANGO_DEBUG=0 PRICING_ADMIN_PATH=maintenance/ PRICING_REDIS_URL=redis://127.0.0.1:6379/0 python manage.py check --deploy --fail-level WARNING
+      - run: docker build .

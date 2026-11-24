@@ -1,0 +1,103 @@
+{% extends 'pricing/base.html' %}
+{% load static tz %}
+{% block title %}Pesquisar preços{% endblock %}
+{% block content %}
+<section class="workbench-heading">
+  <h1>Pesquisar preços</h1>
+  <form class="search-bar" method="get" action="{% url 'pricing:search' %}">
+    <label class="sr-only" for="product-query">Produto, SKU ou EAN</label>
+    <input id="product-query" type="search" name="q" value="{{ query }}" placeholder="Produto, SKU ou EAN" maxlength="255" required{% if not query %} autofocus{% endif %} list="product-suggestions" data-suggestions="{% url 'pricing:suggestions' %}">
+    <datalist id="product-suggestions"></datalist>
+    <button class="primary" type="submit">Buscar</button>
+  </form>
+</section>
+
+{% if recent_queries and not query %}
+<ul class="work-actions recent-queries" aria-label="Buscas recentes">
+  {% for term in recent_queries %}<li><a href="?q={{ term|urlencode }}">{{ term }}</a></li>{% endfor %}
+</ul>
+{% endif %}
+
+{% if products|length > 1 and not product and own_enabled %}
+<section class="panel work-panel">
+  <h2>Escolha um produto do Pompeia</h2>
+  <ul class="result-list">
+    {% for item in products %}
+    <li><a href="?produto={{ item.pk }}&amp;q={{ query|urlencode }}">{{ item.name }} · {{ item.package }} <small>SKU {{ item.sku }}</small></a></li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+{% if product and own_enabled %}
+<section class="panel work-panel">
+  <h2>{{ product.name }}</h2>
+  <p>{{ product.package }} · SKU {{ product.sku }}{% if product.gtin %} · EAN {{ product.gtin }}{% endif %}</p>
+  <p class="money">{% if amount is not None %}Pompeia · R$ {{ amount|floatformat:2 }}{% else %}Preço Pompeia indisponível · sem valor cadastrado{% endif %}</p>
+  {% if price %}<p>{{ price.get_kind_display }} desde {{ price.starts_at|date:'d/m/Y H:i' }}{% if price.ends_at %} até {{ price.ends_at|date:'d/m/Y H:i' }}{% endif %}</p>{% endif %}
+  <div class="work-actions">
+    <a href="{% url 'pricing:product' product.pk %}">Detalhes, histórico e proposta</a>
+    <form method="post" action="{% url 'pricing:queue_action' product.pk %}">{% csrf_token %}<button type="submit" name="action" value="add">Adicionar à fila do dia</button></form>
+  </div>
+  <div class="table-scroll" role="region" aria-label="Comparação confirmada" tabindex="0">
+    <table>
+      <thead><tr><th>Rede · unidade</th><th>Preço observado</th><th>Diferença para o Pompeia</th><th>Coleta e vínculo</th></tr></thead>
+      <tbody>{% for row in rows %}
+        <tr>
+          <th scope="row">{{ row.store.get_retailer_display }} · {{ row.store.unit }}</th>
+          <td>{% if row.observation %}<span class="money">R$ {{ row.observation.price|floatformat:2 }}{% if row.observation.price_unit %}/{{ row.observation.price_unit }}{% endif %}</span>
+          {% if row.observation.club_price %}<small>Clube · R$ {{ row.observation.club_price|floatformat:2 }}</small>{% endif %}
+          {% else %}Indisponível{% endif %}</td>
+          <td>{% if row.comparable %}R$ {{ row.diff|floatformat:2 }} ({{ row.percent|floatformat:1 }}%){% if row.lowest %}<small>Menor preço comparável</small>{% endif %}{% else %}Não comparável{% endif %}</td>
+          <td>{% if row.observation %}
+            {{ row.observation.get_condition_display }} · {{ row.observation.get_availability_display }}
+            <small>{% if row.fresh %}Coletado hoje{% else %}Desatualizado{% endif %} · {{ row.observation.observed_at|date:'d/m/Y H:i' }}{% if row.listing.match_method %} · {{ row.listing.get_match_method_display }}{% endif %}</small>
+            <a href="{{ row.observation.source_url }}" target="_blank" rel="noopener noreferrer">Fonte</a>
+          {% else %}{% if row.listing %}{{ row.listing.get_status_display }}{% else %}Sem anúncio vinculado{% endif %}{% endif %}</td>
+        </tr>
+      {% endfor %}</tbody>
+    </table>
+  </div>
+</section>
+{% endif %}
+
+{% if cached_rows %}
+<section class="market-results" aria-labelledby="market-title">
+  <div class="work-actions">
+    <h2 id="market-title">Concorrentes{% if query %} · {{ query }}{% endif %}</h2>
+    <form method="post" action="{% url 'pricing:refresh' %}" data-live-search data-progress="{% url 'pricing:progress' %}">
+      {% csrf_token %}
+      <input type="hidden" name="q" value="{{ query }}">
+      {% if product and own_enabled %}<input type="hidden" name="product" value="{{ product.pk }}">{% endif %}
+      <button type="submit">Atualizar todas</button>
+    </form>
+  </div>
+  <p class="muted" data-update-status role="status"></p>
+  <div class="market-grid">
+    {% for store, cached in cached_rows %}
+    <article class="panel market-store" data-store="{{ store.pk }}" data-cached="{% if cached.fresh %}1{% endif %}">
+      <div class="market-store-heading">
+        <h3>{{ store.get_retailer_display }} <span>{{ store.unit }}</span></h3>
+        <button class="text-button" type="button" data-retry="{{ store.pk }}">Atualizar</button>
+      </div>
+      <p data-store-state role="status" class="collection-state">
+        {% if cached %}{% if cached.fresh %}Coletado hoje{% else %}Desatualizado{% endif %} · {{ cached.get_status_display }} · {{ cached.finished_at|date:'d/m/Y H:i' }}{% else %}Indisponível · sem coleta registrada{% endif %}
+      </p>
+      <ul class="market-offers" data-offers>
+        {% for offer in cached.result.offers %}
+        <li class="market-offer">
+          <div><a href="{{ offer.url }}" target="_blank" rel="noopener noreferrer">{{ offer.name }}</a><small>{{ offer.condition }} · {{ offer.availability }}</small></div>
+          <div class="market-price"><strong class="money">R$ {{ offer.price|floatformat:2 }}{% if offer.unit %}/{{ offer.unit }}{% endif %}</strong>
+          {% if offer.club %}<small>Clube · R$ {{ offer.club|floatformat:2 }}</small>{% endif %}</div>
+        </li>
+        {% endfor %}
+      </ul>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% elif not configured and own_enabled %}
+<p class="empty-inline">O catálogo do Pompeia ainda está indisponível. Pesquise por nome e embalagem para consultar os concorrentes.</p>
+{% endif %}
+<script defer src="{% static 'pricing/workbench.js' %}"></script>
+{% endblock %}

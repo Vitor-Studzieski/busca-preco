@@ -4,10 +4,13 @@ from urllib.parse import parse_qs, unquote, urlencode, urljoin, urlsplit, urluns
 from .confianca import confianca_search_entries
 from .extract import ProductPage, clean_text
 from .http import (
-    CollectionError, fetch_html, split_storefront_url, storefront_config,
-    validate_product_url, validate_store_url,
+    CollectionError,
+    fetch_html,
+    split_storefront_url,
+    storefront_config,
+    validate_product_url,
+    validate_store_url,
 )
-
 
 SEARCH_PATHS = {
     "lider": ("/busca", "q", "page"),

@@ -1,5 +1,5 @@
-from decimal import Decimal
 import json
+from decimal import Decimal
 from unittest.mock import patch
 from urllib.parse import quote, urlsplit
 
@@ -10,6 +10,7 @@ from django.urls import reverse
 
 from .collectors import CollectedOffer, CollectionError
 from .collectors.search import SearchPage, search_catalog
+from .jobs import work_once
 from .models import Product, Store
 from .offer_search import SearchQuery, search_stores, search_unit
 
@@ -40,6 +41,11 @@ class CompetitorSearchTests(TestCase):
         with patch("pricing.offer_search.search_catalog", side_effect=results) as catalog, patch(
             "pricing.offer_search.collect_offer", side_effect=offer,
         ) as details:
+            self.client.get(reverse("pricing:search"), {"q": "Coca Cola 2 litros"})
+            self.assertEqual(catalog.call_count, 0)
+            self.client.post(reverse("pricing:refresh"), {"q": "Coca Cola 2 litros"})
+            while work_once():
+                pass
             response = self.client.get(reverse("pricing:search"), {"q": "Coca Cola 2 litros"})
 
         self.assertFalse(Product.objects.exists())
@@ -62,8 +68,13 @@ class CompetitorSearchTests(TestCase):
         with patch("pricing.offer_search.search_catalog", side_effect=results), patch(
             "pricing.offer_search.collect_offer", return_value=offer,
         ):
+            job = self.client.post(reverse("pricing:refresh"), {"q": "Coca 2 litros"}).json()
+            while work_once():
+                pass
             response = self.client.get(reverse("pricing:search"), {"q": "Coca 2 litros"})
-        self.assertContains(response, "O Tauste não respondeu.")
+            partial = self.client.get(reverse("pricing:progress"), {"token": job["token"]}).json()
+        self.assertEqual(sum(row["state"] == "updated" for row in partial["rows"]), 3)
+        self.assertIn("O Tauste não respondeu.", [row["reason"] for row in partial["rows"]])
         self.assertContains(response, "10,90", count=3)
 
     def test_package_matching_accepts_equivalent_sizes_and_rejects_bundles(self):

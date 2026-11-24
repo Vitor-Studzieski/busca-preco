@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.db.models import ProtectedError
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
@@ -33,12 +34,19 @@ class AccountFlowTests(TestCase):
             self.client.post(reverse("login"), {"username": "gerencia", "password": self.password}),
             reverse("pricing:search"),
         )
-        administrator.delete()
+        with self.assertRaises(ProtectedError):
+            administrator.delete()
         self.client.logout()
         self.assertRedirects(self.client.post(reverse("initial_setup"), self.first_account),
                              reverse("login"))
-        self.assertFalse(self.user_model.objects.exists())
+        self.assertEqual(self.user_model.objects.count(), 1)
         self.assertEqual(InitialAccountSetup.objects.count(), 1)
+
+    def test_setup_stays_closed_when_only_marker_exists(self):
+        InitialAccountSetup.objects.create()
+        self.assertRedirects(self.client.post(reverse("initial_setup"), self.first_account),
+                             reverse("login"))
+        self.assertFalse(self.user_model.objects.exists())
 
     def test_existing_account_keeps_initial_setup_closed(self):
         existing_user = self.user_model.objects.create_user("existente", password=self.password)

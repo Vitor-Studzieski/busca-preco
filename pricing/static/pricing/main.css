@@ -178,3 +178,22 @@ thead th { font-size: .82rem; background: var(--canvas); color: var(--muted); }
   .account-nav { position: static; margin-left: 0; }
   .comparison-product { align-items: flex-start; flex-direction: column; }
 }
+
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.workbench-heading { max-width: 52rem; }
+.workbench-heading form { margin-top: 1.25rem; }
+.workbench-heading input { min-height: 3.25rem; border-color: #778bac; }
+.work-panel { margin-top: 1rem; padding: 1.15rem; }
+.work-panel h2 + p { margin-top: .4rem; }
+.work-actions { display: flex; align-items: center; flex-wrap: wrap; gap: .55rem 1rem; margin: .65rem 0; }
+.work-actions button:not(.link), .text-button { border: 1px solid #8195b4; border-radius: .5rem; padding: .4rem .75rem; background: white; color: var(--accent); cursor: pointer; min-height: 44px; }
+button:disabled { opacity: .65; cursor: wait; }
+.collection-state { margin-top: .65rem; color: var(--muted); font-size: .88rem; }
+.collection-state[data-state='updated'] { color: #146044; }
+.collection-state[data-state='blocked'], .collection-state[data-state='error'] { color: #972f2f; }
+.collection-state[data-state='pending'], .collection-state[data-state='running'] { color: #73480b; }
+.flat-list { list-style: none; padding-left: 1.15rem; }
+.flat-list li { padding: .6rem 0; }
+.flat-list li + li { border-top: 1px solid var(--line); }
+.recent-queries { list-style: none; padding: 0; }
+.recent-queries a { display: inline-block; text-decoration: none; border: 1px solid var(--line); border-radius: .4rem; padding: .45rem .6rem; }

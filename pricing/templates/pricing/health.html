@@ -1,0 +1,24 @@
+{% extends 'pricing/base.html' %}
+{% block title %}Saúde das coletas{% endblock %}
+{% block content %}
+<h1>Saúde das coletas</h1>
+<div class="market-grid">
+  {% for label, state in networks %}
+  <section class="panel work-panel">
+    <h2>{{ label }}</h2>
+    {% if state.last_success_at %}<p>Última resposta válida · {{ state.last_success_at|date:'d/m/Y H:i' }}</p>{% else %}<p>Sem resposta válida registrada.</p>{% endif %}
+    {% if state.next_attempt_at %}<small>Rede em pausa até {{ state.next_attempt_at|date:'d/m/Y H:i' }}</small>{% endif %}
+  </section>
+  {% endfor %}
+</div>
+<section class="panel work-panel">
+  <h2>Execuções</h2>
+  <ul class="flat-list">
+  {% for run in runs %}
+    <li><strong>{{ run.get_trigger_display|default:run.trigger }}</strong> · {{ run.created_at|date:'d/m/Y H:i' }}
+    {% if run.finished_at %}<small>{{ run.stats.processed }} unidades processadas · {{ run.stats.failed }} falhas</small>
+    {% elif run.started_at %}<small>Em andamento</small>{% else %}<small>Na fila</small>{% endif %}</li>
+  {% empty %}<li>Nenhuma execução registrada.</li>{% endfor %}
+  </ul>
+</section>
+{% endblock %}

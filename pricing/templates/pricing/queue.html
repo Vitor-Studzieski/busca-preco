@@ -1,0 +1,52 @@
+{% extends 'pricing/base.html' %}
+{% block title %}Fila do dia{% else %}
+<section class="panel work-panel">
+  <h2>Pesquisas monitoradas</h2>
+  <ul class="flat-list">
+  {% for item in monitored %}
+    <li><a href="{% url 'pricing:search' %}?q={{ item.query|urlencode }}">{{ item.query }}</a><small>Última busca confirmada · {{ item.last_used_at|date:'d/m/Y H:i' }}</small></li>
+  {% empty %}<li>As buscas que retornarem um preço serão incluídas aqui para as próximas coletas.</li>{% endfor %}
+  </ul>
+</section>
+{% endif %}
+{% endblock %}
+{% block content %}
+<h1>Fila do dia</h1>
+{% if own_enabled %}
+<p class="muted">{{ today|date:'d/m/Y' }} · {{ reviewed }} de {{ total }} produtos revisados</p>
+{% if total %}
+<form method="get" class="work-actions">
+  <label for="queue-status">Estado</label>
+  <select id="queue-status" name="status"><option value="">Todos</option>
+  {% for code, label in statuses %}<option value="{{ code }}"{% if code == status %} selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+  <button type="submit">Filtrar</button>
+</form>
+{% endif %}
+<div class="panel work-panel">
+  <div class="table-scroll" role="region" aria-label="Produtos na fila do dia" tabindex="0">
+    <table><thead><tr><th>Produto</th><th>Estado</th><th>Ações</th></tr></thead><tbody>
+    {% for row in rows %}
+    <tr>
+      <th scope="row"><a href="{% url 'pricing:search' %}?produto={{ row.product_id }}">{{ row.product.name }}</a><small>{{ row.product.package }} · {{ row.product.sku }}</small></th>
+      <td>{{ row.get_status_display }}</td>
+      <td><form method="post" action="{% url 'pricing:queue_action' row.product_id %}" class="work-actions">
+        {% csrf_token %}
+        {% if row.status == 'pending' %}<button type="submit" name="action" value="review">Marcar revisado</button>{% endif %}
+        <button type="submit" name="action" value="collect">Atualizar coleta</button>
+      </form></td>
+    </tr>
+    {% empty %}<tr><td colspan="3">Nenhum produto na fila para este filtro.</td></tr>{% endfor %}
+    </tbody></table>
+  </div>
+</div>
+{% else %}
+<section class="panel work-panel">
+  <h2>Pesquisas monitoradas</h2>
+  <ul class="flat-list">
+  {% for item in monitored %}
+    <li><a href="{% url 'pricing:search' %}?q={{ item.query|urlencode }}">{{ item.query }}</a><small>Última busca confirmada · {{ item.last_used_at|date:'d/m/Y H:i' }}</small></li>
+  {% empty %}<li>As buscas que retornarem um preço serão incluídas aqui para as próximas coletas.</li>{% endfor %}
+  </ul>
+</section>
+{% endif %}
+{% endblock %}

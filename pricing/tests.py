@@ -8,7 +8,7 @@ from unittest.mock import patch
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.core.management import call_command
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
@@ -46,8 +46,8 @@ class PricingFlowTests(TestCase):
         self.client.force_login(buyer)
         return buyer
 
-    @patch("pricing.views.search_stores", return_value=[])
-    def test_search_and_compare_distinct_codes_and_units(self, search_stores):
+    @override_settings(PRICING_ENABLE_OWN_PRICES=True)
+    def test_search_and_compare_distinct_codes_and_units(self):
         self.collect(self.first, "00035", "25.10")
         self.collect(self.second, "00035", "26.20")
         self.collect(self.third, "SKU-X", "27.30")

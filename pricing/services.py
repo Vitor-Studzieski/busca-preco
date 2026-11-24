@@ -9,7 +9,11 @@ from .identifiers import normalize_gtin
 from .models import Listing, Observation, Product, Store
 
 
-def collect_listing(listing):
+def collect_listing(listing, *, collection_run_id=None):
+    if collection_run_id and Observation.objects.filter(
+        listing=listing, collection_run_id=collection_run_id
+    ).exists():
+        return Listing.Status.OK, "Observação já registrada nesta execução.", None
     started_at = timezone.now()
     try:
         offer = collect_offer(listing.store.retailer, listing.store.url, listing.url)
@@ -53,7 +57,8 @@ def collect_listing(listing):
                 listing.match_method = Listing.Match.GTIN
         listing.save()
         Observation.objects.create(
-            listing=listing, price=offer.price, condition=offer.condition,
+            listing=listing, collection_run_id=collection_run_id,
+            price=offer.price, condition=offer.condition,
             club_price=offer.club_price, price_unit=offer.price_unit,
             availability=offer.availability, source_url=offer.url, observed_at=collected_at,
         )
@@ -73,9 +78,9 @@ def record_collection_error(listing_id, started_at, message):
 
 
 def comparison_rows(product, now):
-    listings = {listing.store_id: listing for listing in product.listings.all()}
+    listings = {listing.store_id: listing for listing in product.listings.filter(active=True)}
     oldest_valid = now - timedelta(hours=settings.OFFER_MAX_AGE_HOURS)
-    for store in Store.objects.all():
+    for store in Store.objects.filter(active=True).order_by("display_order", "pk"):
         listing = listings.get(store.pk)
         observation = listing.observations.first() if listing else None
         stale = bool(observation and observation.observed_at < oldest_valid)

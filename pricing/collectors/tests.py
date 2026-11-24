@@ -1,6 +1,6 @@
+import json
 from decimal import Decimal
 from io import BytesIO
-import json
 from unittest import TestCase
 from unittest.mock import patch
 from urllib.error import HTTPError
@@ -8,7 +8,6 @@ from urllib.parse import quote
 
 from . import CollectionError, collect_offer, discover_product_urls, validate_product_url
 from .extract import parse_offer
-
 
 LIDER_URL = "https://www.smlider.com.br/1/produto/m/cafe-exemplo-12345"
 TAUSTE_URL = "https://tauste.com.br/marilia/757-cafe-exemplo.html"

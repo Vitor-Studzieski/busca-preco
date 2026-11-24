@@ -1,0 +1,1001 @@
+{
+  "samples": [
+    {
+      "term": "arroz 5 kg",
+      "cold_ms": 28.28175004106015,
+      "warm_ms": 7.201166939921677,
+      "live_s": 16.168135416926816,
+      "rows": [
+        {
+          "store": 1,
+          "state": "updated",
+          "reason": "Não foi possível abrir o catálogo da loja.",
+          "duration_ms": 8002
+        },
+        {
+          "store": 2,
+          "state": "updated",
+          "reason": "A loja não respondeu no tempo disponível.",
+          "duration_ms": 8114
+        },
+        {
+          "store": 3,
+          "state": "updated",
+          "reason": "",
+          "duration_ms": 4310
+        },
+        {
+          "store": 4,
+          "state": "updated",
+          "reason": "",
+          "duration_ms": 5275
+        }
+      ]
+    },
+    {
+      "term": "feijao carioca 1 kg",
+      "cold_ms": 11.01537502836436,
+      "warm_ms": 4.727083025500178,
+      "live_s": 16.137093624914996,
+      "rows": [
+        {
+          "store": 1,
+          "state": "updated",
+          "reason": "A loja não respondeu no tempo disponível.",
+          "duration_ms": 8075
+        },
+        {
+          "store": 2,
+          "state": "updated",
+          "reason": "Não foi possível abrir o catálogo da loja.",
+          "duration_ms": 8000
+        },
+        {
+          "store": 3,
+          "state": "updated",
+          "reason": "",
+          "duration_ms": 5454
+        },
+        {
+          "store": 4,
+          "state": "updated",
+          "reason": "",
+          "duration_ms": 5566
+        }
+      ]
+    },
+    {
+      "term": "cafe 500 g",
+      "cold_ms": 11.73204102087766,
+      "warm_ms": 6.405332940630615,
+      "live_s": 16.437596541945823,
+      "rows": [
+        {
+          "store": 1,
+          "state": "updated",
+          "reason": "A loja não respondeu no tempo disponível.",
+          "duration_ms": 8316
+        },
+        {
+          "store": 2,
+          "state": "updated",
+          "reason": "A loja não respondeu no tempo disponível.",
+          "duration_ms": 8051
+        },
+        {
+          "store": 3,
+          "state": "updated",
+          "reason": "",
+          "duration_ms": 3340
+        },
+        {
+          "store": 4,
+          "state": "updated",
+          "reason": "",
+          "duration_ms": 6012
+        }
+      ]
+    },
+    {
+      "term": "leite integral 1 l",
+      "cold_ms": 11.013292009010911,
+      "warm_ms": 6.1030000215396285,
+      "live_s": 16.574675500043668,
+      "rows": [
+        {
+          "store": 1,
+          "state": "updated",
+          "reason": "A loja não respondeu no tempo disponível.",
+          "duration_ms": 8379
+        },
+        {
+          "store": 2,
+          "state": "updated",
+          "reason": "A loja não respondeu no tempo disponível.",
+          "duration_ms": 8133
+        },
+        {
+          "store": 3,
+          "state": "updated",
+          "reason": "",
+          "duration_ms": 2755
+        },
+        {
+          "store": 4,
+          "state": "updated",
+          "reason": "",
+          "duration_ms": 4937
+        }
+      ]
+    },
+    {
+      "term": "coca cola 2 l",
+      "cold_ms": 12.307957978919148,
+      "warm_ms": 5.428874981589615,
+      "live_s": 16.135529416031204,
+      "rows": [
+        {
+          "store": 1,
+          "state": "updated",
+          "reason": "A loja não respondeu no tempo disponível.",
+          "duration_ms": 8061
+        },
+        {
+          "store": 2,
+          "state": "updated",
+          "reason": "A loja não respondeu no tempo disponível.",
+          "duration_ms": 8015
+        },
+        {
+          "store": 3,
+          "state": "updated",
+          "reason": "A loja não respondeu no tempo disponível.",
+          "duration_ms": 8034
+        },
+        {
+          "store": 4,
+          "state": "updated",
+          "reason": "",
+          "duration_ms": 4192
+        }
+      ]
+    },
+    {
+      "term": "detergente ype 500 ml",
+      "cold_ms": 10.898707900196314,
+      "warm_ms": 5.548250046558678,
+      "live_s": 16.62368283397518,
+      "rows": [
+        {
+          "store": 1,
+          "state": "updated",
+          "reason": "A loja não respondeu no tempo disponível.",
+          "duration_ms": 8380
+        },
+        {
+          "store": 2,
+          "state": "updated",
+          "reason": "A loja não respondeu no tempo disponível.",
+          "duration_ms": 8179
+        },
+        {
+          "store": 3,
+          "state": "updated",
+          "reason": "",
+          "duration_ms": 2653
+        },
+        {
+          "store": 4,
+          "state": "updated",
+          "reason": "",
+          "duration_ms": 5429
+        }
+      ]
+    },
+    {
+      "term": "oleo soja 900 ml",
+      "cold_ms": 10.34383405931294,
+      "warm_ms": 6.040749954991043,
+      "live_s": 16.21222666592803,
+      "rows": [
+        {
+          "store": 1,
+          "state": "updated",
+          "reason": "A loja não respondeu no tempo disponível.",
+          "duration_ms": 8008
+        },
+        {
+          "store": 2,
+          "state": "updated",
+          "reason": "A loja não respondeu no tempo disponível.",
+          "duration_ms": 8144
+        },
+        {
+          "store": 3,
+          "state": "updated",
+          "reason": "",
+          "duration_ms": 2361
+        },
+        {
+          "store": 4,
+          "state": "updated",
+          "reason": "A loja não respondeu no tempo disponível.",
+          "duration_ms": 8033
+        }
+      ]
+    },
+    {
+      "term": "acucar 1 kg",
+      "cold_ms": 10.985958972014487,
+      "warm_ms": 5.184874986298382,
+      "live_s": 16.08993591705803,
+      "rows": [
+        {
+          "store": 1,
+          "state": "updated",
+          "reason": "Não foi possível abrir o catálogo da loja.",
+          "duration_ms": 8008
+        },
+        {
+          "store": 2,
+          "state": "updated",
+          "reason": "A loja não respondeu no tempo disponível.",
+          "duration_ms": 8018
+        },
+        {
+          "store": 3,
+          "state": "updated",
+          "reason": "",
+          "duration_ms": 8004
+        },
+        {
+          "store": 4,
+          "state": "updated",
+          "reason": "",
+          "duration_ms": 5676
+        }
+      ]
+    },
+    {
+      "term": "sal 1 kg",
+      "cold_ms": 9.661458083428442,
+      "warm_ms": 6.020499975420535,
+      "live_s": 16.082439000019804,
+      "rows": [
+        {
+          "store": 1,
+          "state": "updated",
+          "reason": "",
+          "duration_ms": 8001
+        },
+        {
+          "store": 2,
+          "state": "updated",
+          "reason": "A loja não respondeu no tempo disponível.",
+          "duration_ms": 8007
+        },
+        {
+          "store": 3,
+          "state": "error",
+          "reason": "A loja não respondeu no tempo disponível.",
+          "duration_ms": 8017
+        },
+        {
+          "store": 4,
+          "state": "updated",
+          "reason": "",
+          "duration_ms": 5056
+        }
+      ]
+    },
+    {
+      "term": "farinha trigo 1 kg",
+      "cold_ms": 11.84925006236881,
+      "warm_ms": 4.247709061019123,
+      "live_s": 16.06320199999027,
+      "rows": [
+        {
+          "store": 1,
+          "state": "error",
+          "reason": "A loja não respondeu no tempo disponível.",
+          "duration_ms": 8001
+        },
+        {
+          "store": 2,
+          "state": "error",
+          "reason": "A loja não respondeu no tempo disponível.",
+          "duration_ms": 8001
+        },
+        {
+          "store": 3,
+          "state": "updated",
+          "reason": "",
+          "duration_ms": 5456
+        },
+        {
+          "store": 4,
+          "state": "updated",
+          "reason": "",
+          "duration_ms": 6201
+        }
+      ]
+    },
+    {
+      "term": "contra file kg",
+      "cold_ms": 13.656750088557601,
+      "warm_ms": 5.579457967542112,
+      "live_s": 12.293985415948555,
+      "rows": [
+        {
+          "store": 1,
+          "state": "updated",
+          "reason": "",
+          "duration_ms": 6212
+        },
+        {
+          "store": 2,
+          "state": "updated",
+          "reason": "",
+          "duration_ms": 6019
+        },
+        {
+          "store": 3,
+          "state": "missing",
+          "reason": "",
+          "duration_ms": 3631
+        },
+        {
+          "store": 4,
+          "state": "missing",
+          "reason": "",
+          "duration_ms": 3314
+        }
+      ]
+    },
+    {
+      "term": "banana prata kg",
+      "cold_ms": 10.446834028698504,
+      "warm_ms": 4.8810000298544765,
+      "live_s": 12.612353166914545,
+      "rows": [
+        {
+          "store": 1,
+          "state": "updated",
+          "reason": "",
+          "duration_ms": 6168
+        },
+        {
+          "store": 2,
+          "state": "updated",
+          "reason": "",
+          "duration_ms": 6382
+        },
+        {
+          "store": 3,
+          "state": "missing",
+          "reason": "",
+          "duration_ms": 2434
+        },
+        {
+          "store": 4,
+          "state": "missing",
+          "reason": "",
+          "duration_ms": 3052
+        }
+      ]
+    },
+    {
+      "term": "tomate kg",
+      "cold_ms": 12.151708011515439,
+      "warm_ms": 4.71204100176692,
+      "live_s": 11.465719542000443,
+      "rows": [
+        {
+          "store": 1,
+          "state": "updated",
+          "reason": "",
+          "duration_ms": 5658
+        },
+        {
+          "store": 2,
+          "state": "updated",
+          "reason": "",
+          "duration_ms": 5745
+        },
+        {
+          "store": 3,
+          "state": "missing",
+          "reason": "",
+          "duration_ms": 3055
+        },
+        {
+          "store": 4,
+          "state": "missing",
+          "reason": "",
+          "duration_ms": 1025
+        }
+      ]
+    },
+    {
+      "term": "batata kg",
+      "cold_ms": 11.468834010884166,
+      "warm_ms": 5.931332940235734,
+      "live_s": 15.771976249990985,
+      "rows": [
+        {
+          "store": 1,
+          "state": "updated",
+          "reason": "",
+          "duration_ms": 7706
+        },
+        {
+          "store": 2,
+          "state": "updated",
+          "reason": "Não foi possível abrir o catálogo da loja.",
+          "duration_ms": 8002
+        },
+        {
+          "store": 3,
+          "state": "missing",
+          "reason": "",
+          "duration_ms": 2857
+        },
+        {
+          "store": 4,
+          "state": "missing",
+          "reason": "",
+          "duration_ms": 2229
+        }
+      ]
+    },
+    {
+      "term": "cebola kg",
+      "cold_ms": 11.276875040493906,
+      "warm_ms": 5.586083047091961,
+      "live_s": 16.272168042021804,
+      "rows": [
+        {
+          "store": 1,
+          "state": "updated",
+          "reason": "Não foi possível abrir o catálogo da loja.",
+          "duration_ms": 8191
+        },
+        {
+          "store": 2,
+          "state": "updated",
+          "reason": "A loja não respondeu no tempo disponível.",
+          "duration_ms": 8013
+        },
+        {
+          "store": 3,
+          "state": "missing",
+          "reason": "",
+          "duration_ms": 2752
+        },
+        {
+          "store": 4,
+          "state": "missing",
+          "reason": "",
+          "duration_ms": 932
+        }
+      ]
+    },
+    {
+      "term": "cerveja heineken 600 ml",
+      "cold_ms": 13.915417017415166,
+      "warm_ms": 4.412374924868345,
+      "live_s": 14.069332874962129,
+      "rows": [
+        {
+          "store": 1,
+          "state": "error",
+          "reason": "A loja não respondeu no tempo disponível.",
+          "duration_ms": 8040
+        },
+        {
+          "store": 2,
+          "state": "updated",
+          "reason": "",
+          "duration_ms": 5966
+        },
+        {
+          "store": 3,
+          "state": "error",
+          "reason": "A loja não respondeu no tempo disponível.",
+          "duration_ms": 8751
+        },
+        {
+          "store": 4,
+          "state": "updated",
+          "reason": "",
+          "duration_ms": 2151
+        }
+      ]
+    },
+    {
+      "term": "papel higienico 4 rolos",
+      "cold_ms": 11.300708050839603,
+      "warm_ms": 4.113249946385622,
+      "live_s": 15.647145249997266,
+      "rows": [
+        {
+          "store": 1,
+          "state": "error",
+          "reason": "A loja não respondeu no tempo disponível.",
+          "duration_ms": 8039
+        },
+        {
+          "store": 2,
+          "state": "missing",
+          "reason": "",
+          "duration_ms": 7546
+        },
+        {
+          "store": 3,
+          "state": "error",
+          "reason": "A loja não respondeu no tempo disponível.",
+          "duration_ms": 8038
+        },
+        {
+          "store": 4,
+          "state": "error",
+          "reason": "A loja não respondeu no tempo disponível.",
+          "duration_ms": 8098
+        }
+      ]
+    },
+    {
+      "term": "manteiga 200 g",
+      "cold_ms": 13.23595899157226,
+      "warm_ms": 6.465667043812573,
+      "live_s": 16.196180417085998,
+      "rows": [
+        {
+          "store": 1,
+          "state": "updated",
+          "reason": "Não foi possível abrir o catálogo da loja.",
+          "duration_ms": 8002
+        },
+        {
+          "store": 2,
+          "state": "updated",
+          "reason": "A loja não respondeu no tempo disponível.",
+          "duration_ms": 8127
+        },
+        {
+          "store": 3,
+          "state": "updated",
+          "reason": "",
+          "duration_ms": 3240
+        },
+        {
+          "store": 4,
+          "state": "updated",
+          "reason": "",
+          "duration_ms": 4069
+        }
+      ]
+    },
+    {
+      "term": "macarrao 500 g",
+      "cold_ms": 10.685957968235016,
+      "warm_ms": 3.746541915461421,
+      "live_s": 16.477110999985598,
+      "rows": [
+        {
+          "store": 1,
+          "state": "error",
+          "reason": "A loja não respondeu no tempo disponível.",
+          "duration_ms": 8055
+        },
+        {
+          "store": 2,
+          "state": "error",
+          "reason": "A loja não respondeu no tempo disponível.",
+          "duration_ms": 8378
+        },
+        {
+          "store": 3,
+          "state": "updated",
+          "reason": "A loja não respondeu no tempo disponível.",
+          "duration_ms": 8035
+        },
+        {
+          "store": 4,
+          "state": "updated",
+          "reason": "",
+          "duration_ms": 5060
+        }
+      ]
+    },
+    {
+      "term": "biscoito 200 g",
+      "cold_ms": 5.688374978490174,
+      "warm_ms": 4.75708395242691,
+      "live_s": 8.428295416990295,
+      "rows": [
+        {
+          "store": 1,
+          "state": "error",
+          "reason": "A loja não respondeu no tempo disponível.",
+          "duration_ms": 8377
+        },
+        {
+          "store": 2,
+          "state": "blocked",
+          "reason": "Rede em pausa. Tente novamente depois.",
+          "duration_ms": null
+        },
+        {
+          "store": 3,
+          "state": "updated",
+          "reason": "",
+          "duration_ms": 4413
+        },
+        {
+          "store": 4,
+          "state": "updated",
+          "reason": "",
+          "duration_ms": 6771
+        }
+      ]
+    },
+    {
+      "term": "iogurte 170 g",
+      "cold_ms": 9.402957977727056,
+      "warm_ms": 2.550791949033737,
+      "live_s": 5.66782225004863,
+      "rows": [
+        {
+          "store": 1,
+          "state": "blocked",
+          "reason": "Rede em pausa. Tente novamente depois.",
+          "duration_ms": null
+        },
+        {
+          "store": 2,
+          "state": "blocked",
+          "reason": "Rede em pausa. Tente novamente depois.",
+          "duration_ms": null
+        },
+        {
+          "store": 3,
+          "state": "updated",
+          "reason": "",
+          "duration_ms": 3371
+        },
+        {
+          "store": 4,
+          "state": "updated",
+          "reason": "",
+          "duration_ms": 5635
+        }
+      ]
+    },
+    {
+      "term": "sabao em po 1 kg",
+      "cold_ms": 10.798125062137842,
+      "warm_ms": 3.902000025846064,
+      "live_s": 5.49357141694054,
+      "rows": [
+        {
+          "store": 1,
+          "state": "blocked",
+          "reason": "Rede em pausa. Tente novamente depois.",
+          "duration_ms": null
+        },
+        {
+          "store": 2,
+          "state": "blocked",
+          "reason": "Rede em pausa. Tente novamente depois.",
+          "duration_ms": null
+        },
+        {
+          "store": 3,
+          "state": "error",
+          "reason": "O site não confirmou a busca na unidade selecionada.",
+          "duration_ms": 5443
+        },
+        {
+          "store": 4,
+          "state": "missing",
+          "reason": "",
+          "duration_ms": 4681
+        }
+      ]
+    },
+    {
+      "term": "amaciante 2 l",
+      "cold_ms": 12.232167064212263,
+      "warm_ms": 2.4719159118831158,
+      "live_s": 3.6705618749838322,
+      "rows": [
+        {
+          "store": 1,
+          "state": "blocked",
+          "reason": "Rede em pausa. Tente novamente depois.",
+          "duration_ms": null
+        },
+        {
+          "store": 2,
+          "state": "blocked",
+          "reason": "Rede em pausa. Tente novamente depois.",
+          "duration_ms": null
+        },
+        {
+          "store": 3,
+          "state": "updated",
+          "reason": "",
+          "duration_ms": 3067
+        },
+        {
+          "store": 4,
+          "state": "updated",
+          "reason": "",
+          "duration_ms": 3639
+        }
+      ]
+    },
+    {
+      "term": "levite integral 1 l",
+      "cold_ms": 11.525291018188,
+      "warm_ms": 6.071332958526909,
+      "live_s": 8.082767374929972,
+      "rows": [
+        {
+          "store": 1,
+          "state": "blocked",
+          "reason": "Rede em pausa. Tente novamente depois.",
+          "duration_ms": null
+        },
+        {
+          "store": 2,
+          "state": "blocked",
+          "reason": "Rede em pausa. Tente novamente depois.",
+          "duration_ms": null
+        },
+        {
+          "store": 3,
+          "state": "error",
+          "reason": "A loja não respondeu no tempo disponível.",
+          "duration_ms": 8026
+        },
+        {
+          "store": 4,
+          "state": "missing",
+          "reason": "",
+          "duration_ms": 4787
+        }
+      ]
+    },
+    {
+      "term": "cerv 350 ml",
+      "cold_ms": 10.363125009462237,
+      "warm_ms": 2.532416023313999,
+      "live_s": 4.756424791994505,
+      "rows": [
+        {
+          "store": 1,
+          "state": "blocked",
+          "reason": "Rede em pausa. Tente novamente depois.",
+          "duration_ms": null
+        },
+        {
+          "store": 2,
+          "state": "blocked",
+          "reason": "Rede em pausa. Tente novamente depois.",
+          "duration_ms": null
+        },
+        {
+          "store": 3,
+          "state": "updated",
+          "reason": "",
+          "duration_ms": 3342
+        },
+        {
+          "store": 4,
+          "state": "updated",
+          "reason": "",
+          "duration_ms": 4723
+        }
+      ]
+    },
+    {
+      "term": "refrig cola zero 2 l",
+      "cold_ms": 10.273166932165623,
+      "warm_ms": 3.991708974353969,
+      "live_s": 7.386295082978904,
+      "rows": [
+        {
+          "store": 1,
+          "state": "blocked",
+          "reason": "Rede em pausa. Tente novamente depois.",
+          "duration_ms": null
+        },
+        {
+          "store": 2,
+          "state": "blocked",
+          "reason": "Rede em pausa. Tente novamente depois.",
+          "duration_ms": null
+        },
+        {
+          "store": 3,
+          "state": "missing",
+          "reason": "",
+          "duration_ms": 7338
+        },
+        {
+          "store": 4,
+          "state": "updated",
+          "reason": "",
+          "duration_ms": 2917
+        }
+      ]
+    },
+    {
+      "term": "detg liq ype 500 ml",
+      "cold_ms": 10.122000006958842,
+      "warm_ms": 2.48133298009634,
+      "live_s": 5.464931291062385,
+      "rows": [
+        {
+          "store": 1,
+          "state": "blocked",
+          "reason": "Rede em pausa. Tente novamente depois.",
+          "duration_ms": null
+        },
+        {
+          "store": 2,
+          "state": "blocked",
+          "reason": "Rede em pausa. Tente novamente depois.",
+          "duration_ms": null
+        },
+        {
+          "store": 3,
+          "state": "updated",
+          "reason": "",
+          "duration_ms": 4248
+        },
+        {
+          "store": 4,
+          "state": "updated",
+          "reason": "",
+          "duration_ms": 5433
+        }
+      ]
+    },
+    {
+      "term": "7894900011517",
+      "cold_ms": 9.611999965272844,
+      "warm_ms": 4.2331250151619315,
+      "live_s": 1.9252982499310747,
+      "rows": [
+        {
+          "store": 1,
+          "state": "blocked",
+          "reason": "Rede em pausa. Tente novamente depois.",
+          "duration_ms": null
+        },
+        {
+          "store": 2,
+          "state": "blocked",
+          "reason": "Rede em pausa. Tente novamente depois.",
+          "duration_ms": null
+        },
+        {
+          "store": 3,
+          "state": "missing",
+          "reason": "",
+          "duration_ms": 1875
+        },
+        {
+          "store": 4,
+          "state": "missing",
+          "reason": "",
+          "duration_ms": 920
+        }
+      ]
+    },
+    {
+      "term": "00000757",
+      "cold_ms": 10.468750027939677,
+      "warm_ms": 4.094957956112921,
+      "live_s": 1.937161417095922,
+      "rows": [
+        {
+          "store": 1,
+          "state": "blocked",
+          "reason": "Rede em pausa. Tente novamente depois.",
+          "duration_ms": null
+        },
+        {
+          "store": 2,
+          "state": "blocked",
+          "reason": "Rede em pausa. Tente novamente depois.",
+          "duration_ms": null
+        },
+        {
+          "store": 3,
+          "state": "missing",
+          "reason": "",
+          "duration_ms": 1885
+        },
+        {
+          "store": 4,
+          "state": "missing",
+          "reason": "",
+          "duration_ms": 1000
+        }
+      ]
+    },
+    {
+      "term": "7891000100103",
+      "cold_ms": 10.588667006231844,
+      "warm_ms": 4.385999985970557,
+      "live_s": 2.4856553750578314,
+      "rows": [
+        {
+          "store": 1,
+          "state": "blocked",
+          "reason": "Rede em pausa. Tente novamente depois.",
+          "duration_ms": null
+        },
+        {
+          "store": 2,
+          "state": "blocked",
+          "reason": "Rede em pausa. Tente novamente depois.",
+          "duration_ms": null
+        },
+        {
+          "store": 3,
+          "state": "missing",
+          "reason": "",
+          "duration_ms": 2437
+        },
+        {
+          "store": 4,
+          "state": "missing",
+          "reason": "",
+          "duration_ms": 2044
+        }
+      ]
+    }
+  ],
+  "cold": {
+    "n": 30,
+    "p50_s": 0.011,
+    "p95_s": 0.014
+  },
+  "warm": {
+    "n": 30,
+    "p50_s": 0.005,
+    "p95_s": 0.006
+  },
+  "live": {
+    "n": 30,
+    "p50_s": 14.858,
+    "p95_s": 16.575
+  },
+  "per_store": {
+    "1": {
+      "n": 20,
+      "p50_s": 8.023,
+      "p95_s": 8.379
+    },
+    "2": {
+      "n": 19,
+      "p50_s": 8.013,
+      "p95_s": 8.378
+    },
+    "3": {
+      "n": 30,
+      "p50_s": 3.501,
+      "p95_s": 8.038
+    },
+    "4": {
+      "n": 30,
+      "p50_s": 4.755,
+      "p95_s": 8.033
+    }
+  }
+}

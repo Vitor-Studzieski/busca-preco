@@ -1,10 +1,11 @@
 from urllib.parse import urlsplit
 
+from django import forms
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model, login
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.models import Permission
 from django.contrib.auth.views import LoginView
 from django.core.exceptions import PermissionDenied
@@ -16,8 +17,10 @@ from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.debug import sensitive_post_parameters
 from django.views.decorators.http import require_http_methods
 
+from .access import track_session
 from .models import InitialAccountSetup
-
+from .request_limits import retry_after
+from .workflow_models import AuditLog
 
 LOCAL_ADDRESSES = {"127.0.0.1", "::1"}
 
@@ -36,13 +39,44 @@ def local_development_request(request):
     return urlsplit(f"//{request.get_host()}").hostname in LOCAL_ADDRESSES | {"localhost"}
 
 
+class BuyerAuthenticationForm(AuthenticationForm):
+    remember = forms.BooleanField(label="Manter conectado neste dispositivo", required=False, initial=True)
+
+
 class SignInView(LoginView):
+    authentication_form = BuyerAuthenticationForm
     redirect_authenticated_user = True
 
     def get(self, request, *args, **kwargs):
         if local_development_request(request) and setup_available():
             return redirect("initial_setup")
         return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        username = request.POST.get("username", "").strip().casefold()[:150]
+        ip = request.META.get("REMOTE_ADDR", "")
+        delay = retry_after("signin-ip", ip, limit=60, window=900)
+        if username:
+            delay = max(delay, retry_after("signin-account", (ip, username), limit=10, window=900))
+        if delay:
+            response = self.render_to_response(self.get_context_data(form=self.get_form()), status=429)
+            response["Retry-After"] = str(delay)
+            return response
+        return super().post(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        self.request.session.set_expiry(settings.SESSION_COOKIE_AGE if form.cleaned_data["remember"] else 0)
+        self.request.session["persistent_buyer_session"] = form.cleaned_data["remember"]
+        self.request.session.save()
+        track_session(self.request)
+        AuditLog.objects.create(actor=self.request.user, action="signin.ok")
+        return response
+
+    def form_invalid(self, form):
+        AuditLog.objects.create(action="signin.failed")
+        return super().form_invalid(form)
+
 
 
 @sensitive_post_parameters("password1", "password2")

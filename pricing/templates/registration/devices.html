@@ -1,0 +1,33 @@
+{% extends 'pricing/base.html' %}
+{% block title %}Dispositivos conectados{% endblock %}
+{% block content %}
+<h1>Dispositivos conectados</h1>
+<ul class="panel work-panel flat-list">
+  {% for row in rows %}
+  <li>
+    <strong>{% if row.session_id == request.session.session_key %}Dispositivo atual{% else %}Outro dispositivo{% endif %}</strong>
+    <small>{{ row.last_seen_at|date:'d/m/Y H:i' }} · {{ row.browser|default:"Navegador não informado" }}</small>
+    <form method="post" action="{% url 'revoke_device' row.pk %}" class="work-actions">
+      {% csrf_token %}
+      {% if row.session_id != request.session.session_key %}
+      <label for="revoke-{{ row.pk }}">Confirme sua senha</label>
+      <input id="revoke-{{ row.pk }}" name="password" type="password" autocomplete="current-password" required>
+      {% endif %}
+      <button type="submit">Encerrar sessão</button>
+    </form>
+  </li>
+  {% empty %}<li>Nenhuma sessão registrada nesta lista.</li>{% endfor %}
+</ul>
+<section class="panel work-panel">
+  <h2>Encerrar outras sessões</h2>
+  <form method="post" action="{% url 'revoke_other_devices' %}" class="work-actions">
+    {% csrf_token %}<label for="revoke-all">Confirme sua senha</label>
+    <input id="revoke-all" name="password" type="password" autocomplete="current-password" required>
+    <button type="submit">Sair dos outros dispositivos</button>
+  </form>
+</section>
+<section class="panel work-panel">
+  <h2>Trocar senha</h2>
+  <form method="post">{% csrf_token %}{{ form.as_p }}<button class="primary" type="submit">Trocar senha</button></form>
+</section>
+{% endblock %}

@@ -1,8 +1,8 @@
+import json
+import re
 from dataclasses import dataclass
 from decimal import Decimal
 from html.parser import HTMLParser
-import json
-import re
 from urllib.parse import urljoin, urlsplit
 
 from .http import CollectionError

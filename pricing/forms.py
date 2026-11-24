@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django import forms
 
 from .collectors import CollectionError, validate_product_url
@@ -39,3 +41,21 @@ class PriceDraftForm(forms.ModelForm):
         fields = ["amount", "note"]
         localized_fields = ["amount"]
         widgets = {"note": forms.Textarea(attrs={"rows": 3})}
+
+
+class PublishPriceForm(forms.Form):
+    from .workflow_models import OwnPrice
+
+    amount = forms.DecimalField(label="Valor", min_value=Decimal("0.01"), max_digits=12, decimal_places=2,
+                                localize=True)
+    kind = forms.ChoiceField(label="Tipo de preço", choices=OwnPrice.Kind.choices)
+    starts_at = forms.DateTimeField(label="Início", widget=forms.DateTimeInput(attrs={"type": "datetime-local"}))
+    ends_at = forms.DateTimeField(label="Fim", required=False,
+                                 widget=forms.DateTimeInput(attrs={"type": "datetime-local"}))
+    note = forms.CharField(label="Justificativa", max_length=500, required=False)
+    confirm = forms.BooleanField(label="Confirmo este preço e a vigência")
+
+    def clean(self):
+        data = super().clean()
+        data.pop("confirm", None)
+        return data

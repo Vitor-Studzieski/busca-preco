@@ -1,11 +1,10 @@
-from functools import partial
 import re
+from functools import partial
 from urllib.parse import urljoin, urlsplit
 
 from .confianca import confianca_product_routes
 from .extract import ProductPage
 from .http import CollectionError, fetch_html, validate_product_url, validate_store_url
-
 
 MAX_DISCOVERY_LINKS = 100
 TAUSTE_PRODUCT_SLUG = re.compile(r"[0-9]+-[a-zA-Z0-9_-]+\.html")
