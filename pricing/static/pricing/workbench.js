@@ -1,3 +1,13 @@
+document.querySelectorAll('img[data-store-logo]').forEach((image) => {
+  const fallback = image.nextElementSibling;
+  const showFallback = () => {
+    image.hidden = true;
+    if (fallback?.classList.contains('store-mark')) fallback.hidden = false;
+  };
+  if (image.complete && !image.naturalWidth) showFallback();
+  else image.addEventListener('error', showFallback, {once: true});
+});
+
 const searchInput = document.getElementById('product-query');
 if (searchInput) {
   document.addEventListener('keydown', (event) => {

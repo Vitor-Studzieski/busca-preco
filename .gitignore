@@ -9,3 +9,7 @@ staticfiles/
 .coverage
 .coverage.*
 htmlcov/
+.execucao-local/
+.env.*
+!.env.example
+.vercel/

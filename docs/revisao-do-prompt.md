@@ -9,7 +9,7 @@ O redesenho substitui o cabeçalho horizontal com cartões repetidos por uma ár
 | Fila do dia | Contagem real, ordenação, filtros salvos na sessão, paginação, atualização em lote confirmada e ações de revisão no modo catálogo. Sem catálogo, a fila mostra consultas dos concorrentes que já retornaram preços. |
 | Alertas | Abertos, não reconhecidos e resolvidos. Plantão de coleta e vigência continuam persistentes. O mecanismo de diferença usa somente regras editadas e ativadas com limites válidos. Nenhuma regra comercial foi cadastrada. |
 | Saúde | Próxima janela, tarefas pendentes, tarefas em execução, estado por rede e histórico real de execuções. Janelas atuais de 04h e 14h. |
-| Identidade visual | Logo Pompeia existente. Espaço para logos concorrentes aprovados com validação de arquivo estático, extensão e tamanho. As redes sem arquivo aprovado ficam identificadas pelo nome e iniciais. |
+| Identidade visual | Logos oficiais originais versionados e associados às lojas. O comparativo exibe a marca e unidade com fallback textual neutro; a logo própria aparece junto ao preço do Pompéia. SVG fica restrito a arquivo estático validado. |
 | Banco e segurança | Constraints PostgreSQL, auditoria imutável existente, sessão e revogação. Administração técnica exige TOTP no perfil de produção. O token de acompanhamento segue em cabeçalho para ficar fora da URL e dos logs de acesso. |
 | Operação | Imagem web sem root e com estáticos na build, arquivos de execução em leitura no Compose, papéis de banco separados e script de backup criptografado. Validado em Docker local fechado, com migrations, PostgreSQL, Redis, worker e web. O servidor do escritório ainda será configurado. |
 
@@ -30,4 +30,4 @@ O redesenho substitui o cabeçalho horizontal com cartões repetidos por uma ár
 
 ## Dependências da próxima etapa
 
-Catálogo e espelho do Pompeia, taxonomia, logos aprovados e limites comerciais dependem dos dados e das decisões do escritório. O perfil de produção depende do hostname, TLS, rede autorizada, credenciais, autenticador técnico e chave de backup. A imagem e a configuração foram validadas localmente. A restauração do backup criptografado, a certificação ASVS/WCAG completas e a execução do CI remoto não foram validadas no servidor do escritório.
+Catálogo e espelho do Pompeia, taxonomia e limites comerciais dependem dos dados e das decisões do escritório. Os logos oficiais foram versionados; a validação visual no servidor real ainda depende do deploy. O perfil de produção depende do hostname, TLS, rede autorizada, credenciais, autenticador técnico e chave de backup. A imagem e a configuração foram validadas localmente. A restauração do backup criptografado, a certificação ASVS/WCAG completas e a execução do CI remoto não foram validadas no servidor do escritório.

@@ -31,7 +31,7 @@ Para voltar ao código anterior antes do corte, reative a base anterior pelo bac
 
 Em produção, vincule um autenticador ao administrador antes de acessar o Django Admin. Gere uma chave Base32 de 20 bytes no gerenciador de segredos da empresa, registre-a no aplicativo autenticador e execute `docker compose exec web python manage.py enroll_admin_otp USUARIO`. Digite a chave e o código atual nos prompts ocultos. Use o próximo código válido ao entrar no painel. O portal dos compradores usa uma sessão diferente da verificação do painel técnico. Consulte a [documentação do django-otp](https://django-otp-official.readthedocs.io/en/stable/auth.html).
 
-`PRICING_SESSION_IDLE_DAYS` define a duração deslizante, com 30 dias como padrão. Deixe `PRICING_ENABLE_OWN_PRICES=0` até integrar o catálogo. `PRICING_ALLOW_MANUAL_LINKS` só deve ser ativada após estabelecer a política para casos sem GTIN. Para logos oficiais, inclua a imagem aprovada em `pricing/static/pricing/stores/`, respeitando os formatos PNG, JPG ou WebP e o limite de 256 KiB, e selecione o caminho no cadastro da unidade.
+`PRICING_SESSION_IDLE_DAYS` define a duração deslizante, com 30 dias como padrão. Deixe `PRICING_ENABLE_OWN_PRICES=0` até integrar o catálogo. `PRICING_ALLOW_MANUAL_LINKS` só deve ser ativada após estabelecer a política para casos sem GTIN. Para logos oficiais, inclua o arquivo original aprovado em `pricing/static/pricing/stores/`, respeitando PNG, JPG, WebP ou SVG estático validado e o limite de 256 KiB; depois selecione o caminho no cadastro da unidade.
 
 ## Backups criptografados
 

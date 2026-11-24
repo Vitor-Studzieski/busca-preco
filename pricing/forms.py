@@ -91,7 +91,7 @@ class StoreForm(forms.ModelForm):
         asset = self.cleaned_data["logo"]
         if not asset:
             return asset
-        if not re.fullmatch(r"pricing/stores/[a-zA-Z0-9_-]+\.(?:png|webp|jpg)", asset):
+        if not re.fullmatch(r"pricing/stores/[a-zA-Z0-9_-]+\.(?:png|webp|jpg|svg)", asset):
             raise forms.ValidationError("Informe um recurso estático aprovado em pricing/stores/.")
         filename = finders.find(asset)
         if not filename or Path(filename).stat().st_size > 256 * 1024:
@@ -102,6 +102,21 @@ class StoreForm(forms.ModelForm):
             or asset.endswith(".jpg") and signature.startswith(b"\xff\xd8\xff")
             or asset.endswith(".webp") and signature[:4] == b"RIFF" and signature[8:] == b"WEBP"
         )
+        if asset.endswith(".svg"):
+            try:
+                svg_text = Path(filename).read_text(encoding="utf-8")
+            except (OSError, UnicodeError):
+                svg_text = ""
+            root = re.match(
+                r"""\s*(?:<\?xml.*?\?>\s*)?<svg\b[^>]*\bxmlns=["']http://www\.w3\.org/2000/svg["']""",
+                svg_text, re.IGNORECASE | re.DOTALL,
+            )
+            unsafe = re.search(
+                r"<\s*(?:script|foreignObject)\b|\son[a-z0-9_-]+\s*=|"
+                r"(?:href|src)\s*=\s*([\"'])(?!#)|url\(\s*(?!#)|@import",
+                svg_text, re.IGNORECASE,
+            )
+            valid = asset == "pricing/stores/tauste.svg" and root is not None and unsafe is None
         if not valid:
             raise forms.ValidationError("O conteúdo não corresponde ao formato de imagem informado.")
         return asset

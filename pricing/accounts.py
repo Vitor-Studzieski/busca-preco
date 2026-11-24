@@ -19,7 +19,7 @@ from django.views.decorators.http import require_http_methods
 
 from .access import track_session
 from .models import InitialAccountSetup
-from .request_limits import retry_after
+from .request_limits import client_ip, retry_after
 from .workflow_models import AuditLog
 
 LOCAL_ADDRESSES = {"127.0.0.1", "::1"}
@@ -54,7 +54,7 @@ class SignInView(LoginView):
 
     def post(self, request, *args, **kwargs):
         username = request.POST.get("username", "").strip().casefold()[:150]
-        ip = request.META.get("REMOTE_ADDR", "")
+        ip = client_ip(request)
         delay = retry_after("signin-ip", ip, limit=60, window=900)
         if username:
             delay = max(delay, retry_after("signin-account", (ip, username), limit=10, window=900))

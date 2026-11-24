@@ -2,17 +2,29 @@ import os
 import re
 from pathlib import Path
 from secrets import token_urlsafe
+from urllib.parse import parse_qs, unquote, urlsplit
 
 from django.core.exceptions import ImproperlyConfigured
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-DEBUG = os.getenv("DJANGO_DEBUG", "1") == "1"
+IS_VERCEL = os.getenv("VERCEL") == "1" or bool(os.getenv("VERCEL_ENV"))
+DJANGO_TRUST_LOCAL_PROXY = os.getenv("DJANGO_TRUST_LOCAL_PROXY", "0") == "1"
+DEBUG = os.getenv("DJANGO_DEBUG", "0" if IS_VERCEL else "1") == "1"
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 if not SECRET_KEY:
     if not DEBUG:
         raise ImproperlyConfigured("Defina DJANGO_SECRET_KEY fora do ambiente de desenvolvimento.")
     SECRET_KEY = token_urlsafe(64)
-ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,[::1]").split(",")
+ALLOWED_HOSTS = [
+    host.strip() for host in os.getenv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,[::1]").split(",")
+    if host.strip()
+]
+VERCEL_DOMAINS = []
+for variable in ("VERCEL_URL", "VERCEL_BRANCH_URL", "VERCEL_PROJECT_PRODUCTION_URL"):
+    domain = os.getenv(variable, "").strip()
+    if domain and domain not in VERCEL_DOMAINS:
+        VERCEL_DOMAINS.append(domain)
+ALLOWED_HOSTS.extend(domain for domain in VERCEL_DOMAINS if domain not in ALLOWED_HOSTS)
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -50,7 +62,25 @@ TEMPLATES = [
 ]
 WSGI_APPLICATION = "project.wsgi.application"
 
-if os.getenv("POSTGRES_DB"):
+DATABASE_URL = os.getenv("DATABASE_URL") or os.getenv("POSTGRES_URL")
+if DATABASE_URL:
+    parsed_database_url = urlsplit(DATABASE_URL)
+    if (parsed_database_url.scheme not in {"postgres", "postgresql"}
+            or not parsed_database_url.hostname or not parsed_database_url.path.strip("/")):
+        raise ImproperlyConfigured("DATABASE_URL deve ser uma URL PostgreSQL válida.")
+    database_query = parse_qs(parsed_database_url.query)
+    DATABASES = {"default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": unquote(parsed_database_url.path.lstrip("/")),
+        "USER": unquote(parsed_database_url.username or ""),
+        "PASSWORD": unquote(parsed_database_url.password or ""),
+        "HOST": parsed_database_url.hostname,
+        "PORT": str(parsed_database_url.port or ""),
+        "OPTIONS": {
+            "sslmode": database_query.get("sslmode", [os.getenv("POSTGRES_SSLMODE", "require")])[0],
+        },
+    }}
+elif os.getenv("POSTGRES_DB"):
     DATABASES = {"default": {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": os.environ["POSTGRES_DB"],
@@ -120,7 +150,7 @@ if (len(PRICING_COLLECTION_HOURS) != 2 or len(set(PRICING_COLLECTION_HOURS)) != 
     raise ImproperlyConfigured("Defina dois horários distintos entre 0 e 23 para a coleta.")
 PRICING_ALLOW_MANUAL_LINKS = os.getenv("PRICING_ALLOW_MANUAL_LINKS", "0") == "1"
 PRICING_ENABLE_OWN_PRICES = os.getenv("PRICING_ENABLE_OWN_PRICES", "0") == "1"
-PRICING_REDIS_URL = os.getenv("PRICING_REDIS_URL", "")
+PRICING_REDIS_URL = os.getenv("PRICING_REDIS_URL") or os.getenv("REDIS_URL", "")
 if PRICING_REDIS_URL:
     for cache_alias in CACHES:
         CACHES[cache_alias] = {
@@ -151,7 +181,13 @@ PASSWORD_HASHERS = [
 ]
 SECURE_REFERRER_POLICY = "same-origin"
 X_FRAME_OPTIONS = "DENY"
-CSRF_TRUSTED_ORIGINS = [value.strip() for value in os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",") if value.strip()]
+CSRF_TRUSTED_ORIGINS = [
+    value.strip() for value in os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",") if value.strip()
+]
+CSRF_TRUSTED_ORIGINS.extend(
+    origin for origin in (f"https://{domain}" for domain in VERCEL_DOMAINS)
+    if origin not in CSRF_TRUSTED_ORIGINS
+)
 SECURE_SSL_REDIRECT = not DEBUG
 SECURE_HSTS_SECONDS = 0 if DEBUG else 31536000
 SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG
@@ -159,13 +195,14 @@ SECURE_HSTS_PRELOAD = not DEBUG
 if not DEBUG:
     if len(SECRET_KEY) < 50 or "*" in ALLOWED_HOSTS:
         raise ImproperlyConfigured("Defina uma chave exclusiva forte e hosts restritos em produção.")
-    if not os.getenv("POSTGRES_DB") or not PRICING_REDIS_URL:
+    if not (DATABASE_URL or os.getenv("POSTGRES_DB")) or not PRICING_REDIS_URL:
         raise ImproperlyConfigured("Produção requer PostgreSQL e Redis.")
     if PORTAL_ADMIN_PATH == "admin/":
         raise ImproperlyConfigured("Defina PRICING_ADMIN_PATH específico para produção.")
-    if os.getenv("DJANGO_TRUST_LOCAL_PROXY", "0") == "1":
+    if DJANGO_TRUST_LOCAL_PROXY or IS_VERCEL:
         SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-    DATABASES["default"]["OPTIONS"] = {"sslmode": os.getenv("POSTGRES_SSLMODE", "prefer")}
+    if not DATABASE_URL:
+        DATABASES["default"]["OPTIONS"] = {"sslmode": os.getenv("POSTGRES_SSLMODE", "prefer")}
     MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware")
     INSTALLED_APPS[0] = "project.admin_apps.ProtectedAdminConfig"
 OTP_TOTP_ISSUER = "Portal Pompeia"

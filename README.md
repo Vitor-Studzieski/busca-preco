@@ -3,7 +3,10 @@
 Portal interno para dois compradores pesquisarem preços no Super Líder de Pompéia e Herculândia, Tauste de Marília e Confiança de Marília. A pesquisa abre com o último preço confirmado no banco e atualiza cada unidade em segundo plano. A primeira fase usa dados dos concorrentes. O catálogo e os preços do Pompeia entram em uma etapa posterior.
 
 - [Operação, implantação no escritório e migração de dados](docs/runbook.md)
+- [Implantação na Vercel](docs/deploy-vercel.md)
 - [Auditoria](docs/auditoria.md)
+- [Avaliação e plano incremental](docs/melhorias-radar-precos.md)
+- [Contexto original da solicitação](docs/contexto/solicitacao-2026-11-24/README.md)
 - [Desempenho](docs/baseline-desempenho.md)
 - [Segurança](docs/seguranca.md)
 - [Arquitetura da fila](docs/adr/0001-portal-e-fila.md)

@@ -2,14 +2,14 @@ from django.http import HttpResponse
 from django.views.decorators.debug import sensitive_post_parameters
 from django_otp.admin import OTPAdminSite
 
-from pricing.request_limits import retry_after
+from pricing.request_limits import client_ip, retry_after
 
 
 class ProtectedAdminSite(OTPAdminSite):
     @sensitive_post_parameters()
     def login(self, request, extra_context=None):
         if request.method == "POST":
-            ip = request.META.get("REMOTE_ADDR", "")
+            ip = client_ip(request)
             wait = retry_after("admin-login", ip, limit=20, window=900)
             if wait:
                 return HttpResponse(

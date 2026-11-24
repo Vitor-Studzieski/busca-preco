@@ -68,8 +68,8 @@
     {% for store, cached, attempt in cached_rows %}
     <article class="quote-row" data-store="{{ store.pk }}" data-cached="{% if cached.fresh or attempt.status == 'blocked' %}1{% else %}0{% endif %}" aria-labelledby="store-{{ store.pk }}">
       <header class="quote-identity">
-        {% if store.logo %}<img class="store-logo" src="{% static store.logo %}" alt="" width="34" height="34">
-        {% else %}<div class="store-mark {% if store.retailer == 'lider' %}mark-blue{% elif store.retailer == 'tauste' %}mark-purple{% else %}mark-green{% endif %}" aria-hidden="true">{{ store.get_retailer_display|first }}</div>{% endif %}
+        {% if store.logo %}<img class="store-logo" data-store-logo src="{% static store.logo %}" alt="Logo da rede {{ store.get_retailer_display }}" width="34" height="34"><div class="store-mark" aria-hidden="true" hidden>{{ store.get_retailer_display|first }}</div>
+        {% else %}<div class="store-mark" aria-hidden="true">{{ store.get_retailer_display|first }}</div>{% endif %}
         <div><h3 id="store-{{ store.pk }}">{{ store.get_retailer_display }}</h3><span>{{ store.unit }}</span></div>
       </header>
       <div class="quote-results">

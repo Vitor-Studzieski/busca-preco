@@ -1,7 +1,8 @@
+{% load static %}
 <section class="panel comparison" aria-labelledby="comparison-title">
   <div class="panel-heading">
     <div><h2 id="comparison-title">Comparação do Pompeia</h2><p>{{ product.name }} · {{ product.package }} · SKU {{ product.sku }}{% if product.gtin %} · EAN {{ product.gtin }}{% endif %}</p></div>
-    <div class="price-callout"><small>Preço vigente</small><strong class="money">{% if amount is not None %}R$ {{ amount|floatformat:2 }}{% else %}Indisponível{% endif %}</strong>
+    <div class="price-callout"><small><img class="store-logo" data-store-logo src="{% static 'pricing/stores/pompeia.png' %}" alt="Logo do Supermercado Pompéia" width="34" height="34"><span class="store-mark" aria-hidden="true" hidden>P</span> Supermercado Pompéia · preço vigente</small><strong class="money">{% if amount is not None %}R$ {{ amount|floatformat:2 }}{% else %}Indisponível{% endif %}</strong>
       {% if price %}<small>{{ price.get_kind_display }} · {{ price.starts_at|date:'d/m/Y H:i' }}{% if price.ends_at %} até {{ price.ends_at|date:'d/m/Y H:i' }}{% endif %}</small>{% endif %}
     </div>
   </div>
@@ -10,7 +11,7 @@
       <thead><tr><th scope="col">Rede e unidade</th><th scope="col">Preço observado</th><th scope="col">Diferença para o Pompeia</th><th scope="col">Coleta e vínculo</th></tr></thead>
       <tbody>{% for row in rows %}
         <tr{% if row.lowest %} class="lowest-row"{% endif %}>
-          <th scope="row">{{ row.store.get_retailer_display }}<small>{{ row.store.unit }}</small></th>
+          <th scope="row">{% if row.store.logo %}<img class="store-logo" data-store-logo src="{% static row.store.logo %}" alt="Logo da rede {{ row.store.get_retailer_display }}" width="28" height="28"><span class="store-mark" aria-hidden="true" hidden>{{ row.store.get_retailer_display|first }}</span>{% else %}<span class="store-mark" aria-hidden="true">{{ row.store.get_retailer_display|first }}</span>{% endif %} {{ row.store.get_retailer_display }}<small>{{ row.store.unit }}</small></th>
           <td data-label="Preço observado">{% if row.observation %}<strong class="money">R$ {{ row.observation.price|floatformat:2 }}{% if row.observation.price_unit %}/{{ row.observation.price_unit }}{% endif %}</strong>
           {% if row.observation.club_price %}<small>Clube · R$ {{ row.observation.club_price|floatformat:2 }}</small>{% endif %}
           {% else %}Indisponível{% endif %}</td>

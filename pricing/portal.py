@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.core import signing
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
-from django.db.models import Count, OuterRef, Subquery
+from django.db.models import Count, OuterRef, Q, Subquery
 from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -240,11 +240,57 @@ def collection_health(request):
     future = [now.replace(hour=hour, minute=0, second=0, microsecond=0) for hour in hours]
     next_collection = next((item for item in future if item > now), future[0] + timedelta(days=1))
     counts = dict(CollectionJob.objects.filter(status__in=OPEN).values_list("status").annotate(total=Count("pk")))
+    latest_attempts = CollectionJob.objects.filter(
+        store_id=OuterRef("pk"), finished_at__isnull=False,
+    ).order_by("-finished_at", "-pk")
+    latest_successes = latest_attempts.exclude(
+        status__in=(CollectionJob.Status.ERROR, CollectionJob.Status.BLOCKED),
+    )
+    store_rows = list(
+        Store.objects.filter(active=True).order_by("display_order", "pk").annotate(
+            latest_job_id=Subquery(latest_attempts.values("pk")[:1]),
+            last_success_at=Subquery(latest_successes.values("finished_at")[:1]),
+        )
+    )
+    latest_jobs = CollectionJob.objects.in_bulk(
+        [row.latest_job_id for row in store_rows if row.latest_job_id]
+    )
+    latest_run_ids = {job.run_id for job in latest_jobs.values() if job.run_id}
+    cycle_counts = {}
+    if latest_run_ids:
+        grouped = CollectionJob.objects.filter(
+            run_id__in=latest_run_ids, finished_at__isnull=False,
+        ).values("run_id", "store_id").annotate(
+            processed=Count("pk"),
+            failed=Count("pk", filter=Q(status__in=(
+                CollectionJob.Status.ERROR, CollectionJob.Status.BLOCKED,
+            ))),
+        )
+        cycle_counts = {
+            (row["run_id"], row["store_id"]): row for row in grouped
+        }
+    store_statuses = []
+    for store in store_rows:
+        latest = latest_jobs.get(store.latest_job_id)
+        cycle = cycle_counts.get((latest.run_id, store.pk)) if latest and latest.run_id else None
+        store_statuses.append({
+            "store": store,
+            "latest": latest,
+            "last_success_at": store.last_success_at,
+            "processed": cycle["processed"] if cycle else int(latest is not None),
+            "failed": cycle["failed"] if cycle else int(
+                latest is not None and latest.status in (
+                    CollectionJob.Status.ERROR, CollectionJob.Status.BLOCKED,
+                )
+            ),
+            "reason": (latest.result or {}).get("reason", "") if latest else "",
+            "query": latest.query if latest else "",
+        })
     return render(request, "pricing/health.html", {
         "networks": [(label, status.get(code)) for code, label in Store.Retailer.choices], "runs": runs,
         "pending_jobs": counts.get(CollectionJob.Status.PENDING, 0),
         "running_jobs": counts.get(CollectionJob.Status.RUNNING, 0),
-        "next_collection": next_collection, "now": now,
+        "next_collection": next_collection, "now": now, "store_statuses": store_statuses,
     })
 
 

@@ -1,10 +1,26 @@
 from datetime import datetime, timezone
 from hashlib import sha256
+from ipaddress import ip_address
 from time import time
 
 from django.conf import settings
 from django.core.cache import caches
 from django.db import transaction
+
+
+def client_ip(request):
+    remote = request.META.get("REMOTE_ADDR", "")
+    if settings.IS_VERCEL:
+        forwarded = request.META.get("HTTP_X_VERCEL_FORWARDED_FOR", "")
+    elif settings.DJANGO_TRUST_LOCAL_PROXY:
+        forwarded = request.META.get("HTTP_X_FORWARDED_FOR", "")
+    else:
+        return remote
+    candidate = forwarded.split(",", 1)[0].strip()
+    try:
+        return str(ip_address(candidate))
+    except ValueError:
+        return remote
 
 
 def retry_after(scope, identity, *, limit, window):

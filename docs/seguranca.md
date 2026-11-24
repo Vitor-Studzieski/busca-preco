@@ -15,7 +15,7 @@ O alvo é OWASP ASVS nível 2. A tabela reúne os controles auditados para esta 
 |---|---|---|
 | Autenticação e sessão | `pricing/accounts.py`, `pricing/access.py`, testes do fluxo | Implementado para compradores. A duração final é uma decisão do escritório. O perfil de produção protege o painel técnico com TOTP. |
 | Controle de acesso | Testes de visitantes e compradores, token de progresso vinculado ao usuário | Cobertura das rotas principais. Revisar a matriz completa antes do deploy. |
-| Entrada e saída | Escapamento Django, montagem do DOM com textContent e validação de protocolo | Implementado. Cadastro de logos oficiais adiado. |
+| Entrada e saída | Escapamento Django, montagem do DOM com textContent e validação de protocolo | Logos oficiais versionados em caminhos estáticos permitidos; SVG é validado como SVG estático sem scripts, eventos ou referências externas. |
 | Comunicação | HTTPS obrigatório no perfil de produção, Caddy, HSTS e CSRF configuráveis | Configuração preparada. Certificado e perímetro reais pendentes. |
 | Dependências e configuração | Lock com hashes, Ruff, Bandit, pip-audit e `manage.py check --deploy` no pipeline | Auditoria local registrada no relatório. CI remoto ainda depende do repositório hospedado. |
 | Operação e dados | Papéis de banco separados no Compose, healthcheck, plano de backup e restauração | Transferência local validada separadamente. Automatização e custódia de backups de produção pendentes. |

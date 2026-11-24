@@ -7,6 +7,31 @@
   <div class="panel stat"><small>Tarefas na fila</small><strong>{{ pending_jobs }}</strong></div>
   <div class="panel stat"><small>Em execução</small><strong>{{ running_jobs }}</strong></div>
 </div>
+<section class="panel">
+  <div class="panel-heading"><div><h2>Última tentativa por unidade</h2><p>Horário, estado e resultado do ciclo mais recente de cada loja.</p></div></div>
+  <div class="table-scroll" role="region" aria-label="Última coleta por unidade" tabindex="0">
+    <table class="responsive-table">
+      <thead><tr><th scope="col">Rede e unidade</th><th scope="col">Última tentativa concluída</th><th scope="col">Última resposta válida</th><th scope="col">Ciclo da unidade</th><th scope="col">Detalhe</th></tr></thead>
+      <tbody>{% for row in store_statuses %}
+        <tr>
+          <th scope="row">{{ row.store.get_retailer_display }}<small>{{ row.store.unit }}</small></th>
+          <td data-label="Última tentativa concluída">
+            {% if row.latest %}
+              <span class="status-pill" data-tone="{% if row.latest.status == 'updated' or row.latest.status == 'unavailable' %}success{% elif row.latest.status == 'error' or row.latest.status == 'blocked' %}danger{% else %}warning{% endif %}">{{ row.latest.get_status_display }}</span>
+              <small>{{ row.latest.finished_at|date:'d/m/Y H:i' }}</small>
+            {% else %}<span class="status-pill">Sem tentativa registrada</span>{% endif %}
+          </td>
+          <td data-label="Última resposta válida">{% if row.last_success_at %}{{ row.last_success_at|date:'d/m/Y H:i' }}{% else %}Sem resposta válida registrada{% endif %}</td>
+          <td data-label="Ciclo da unidade">{% if row.latest %}{{ row.processed }} finalizada(s) · {{ row.failed }} falha(s){% else %}—{% endif %}</td>
+          <td data-label="Detalhe">
+            {% if row.reason %}<small>{{ row.reason }}</small>{% endif %}
+            {% if row.query %}<a href="{% url 'pricing:search' %}?q={{ row.query|urlencode }}">Abrir pesquisa para tentar novamente</a>{% elif not row.reason %}—{% endif %}
+          </td>
+        </tr>
+      {% empty %}<tr><td colspan="5" class="table-empty">Nenhuma unidade ativa.</td></tr>{% endfor %}</tbody>
+    </table>
+  </div>
+</section>
 <div class="networks">
   {% for label, state in networks %}
   <section class="panel network">

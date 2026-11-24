@@ -10,9 +10,13 @@ O portal consulta as quatro unidades concorrentes, conserva a última coleta con
 - **Navegador.** Playwright sobre Chrome verificou login persistente, busca por nome com ofertas reais de quatro unidades, fila de pesquisas monitoradas, saúde das coletas, dispositivos e a tela mobile sem rolagem horizontal. O fluxo provisório de vigência e aviso de bloqueio foi exercitado em testes de integração. A publicação real fica para depois do catálogo.
 - **Configuração.** Ruff, Bandit para achados de severidade e confiança médias ou superiores, pip-audit no lock, `manage.py check --deploy`, validação do Compose e verificação de migrations sem pendências passaram localmente. O daemon do Docker não estava ativo para construir a imagem. A execução de CI remoto e a homologação no servidor do escritório ainda dependem do ambiente.
 
+- **Verificação incremental (24/11/2026).** `manage.py check` sem problemas; `makemigrations --check --dry-run` sem alterações; suíte com 75 testes executados e 1 ignorado. `git diff --check` sem erros.
+
 ## Arquivos
 
 - [Auditoria e situação de cada achado](auditoria.md)
+- [Avaliação e plano incremental](melhorias-radar-precos.md)
+- [Contexto original da solicitação](contexto/solicitacao-2026-11-24/README.md)
 - [Benchmark e metodologia](baseline-desempenho.md)
 - [Captura desktop](evidencias/pesquisa-desktop.png)
 - [Captura mobile](evidencias/pesquisa-mobile.png)
