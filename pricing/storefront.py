@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
+from time import perf_counter
 
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.utils import timezone
 from django.views.decorators.http import require_GET
@@ -73,6 +74,52 @@ def to_market_offer(result_offer, store, observed_at):
     )
 
 
+def serialize_unit_result(store, offers, issue, observed_at):
+    observed_at = observed_at or timezone.now()
+    return {
+        "slug": store.slug,
+        "name": store.get_retailer_display(),
+        "location": store.unit,
+        "is_reference": store.retailer == "pompeia",
+        "status": "error" if issue and not offers else "partial" if issue else "success",
+        "issue": issue,
+        "observed_at": observed_at.isoformat(),
+        "offers": [
+            {
+                "name": offer.name,
+                "gtin": offer.gtin,
+                "price": str(offer.price),
+                "unit": offer.unit,
+                "condition": offer.condition,
+                "condition_detail": offer.condition_detail,
+                "availability": offer.availability,
+                "club_price": str(offer.club_price) if offer.club_price is not None else None,
+                "is_club": offer.is_club,
+                "is_multibuy": offer.is_multibuy,
+                "url": offer.url,
+                "observed_at": offer.observed_at.isoformat(),
+            }
+            for offer in offers
+        ],
+    }
+
+
+def present_unit_result(result):
+    store = result.store
+    observed_at = result.observed_at or timezone.now()
+    offers = [
+        offer for item in result.offers
+        if (offer := to_market_offer(item, store, observed_at)) is not None
+    ]
+    return serialize_unit_result(store, offers, result.issue, observed_at)
+
+
+def present_group(group):
+    offers = group["offers"]
+    observed_at = max((offer.observed_at for offer in offers), default=timezone.now())
+    return serialize_unit_result(group["store"], offers, group["issue"], observed_at)
+
+
 def compare_offers(stores, query):
     results = search_stores(stores, query)
     groups = []
@@ -110,7 +157,7 @@ def compare_offers(stores, query):
 @require_GET
 def home(request):
     query = request.GET.get("q", "").strip()[:255]
-    if query and (retry_after := search_retry_after(request)):
+    if query and (retry_after := search_retry_after(request, query=query)):
         return HttpResponse(
             "Muitas buscas em sequência. Aguarde um pouco e tente novamente.",
             status=429,
@@ -118,12 +165,46 @@ def home(request):
             content_type="text/plain; charset=utf-8",
         )
 
+    started = perf_counter()
     stores = list(Store.objects.filter(active=True).order_by("display_order", "pk"))
     groups, matching_stores, lowest_price = compare_offers(stores, query) if query else ([], 0, None)
     return render(request, "pricing/storefront/home.html", {
         "query": query,
         "stores": stores,
         "groups": groups,
+        "initial_results": [present_group(group) for group in groups],
         "matching_stores": matching_stores,
         "lowest_price": lowest_price,
+        "elapsed_seconds": perf_counter() - started,
+    })
+
+
+@require_GET
+def unit_search(request):
+    """Return live search results for one unit, or both Líder units together."""
+    query = request.GET.get("q", "").strip()
+    store_slug = request.GET.get("store", "").strip()
+    if not query or len(query) > 255:
+        return JsonResponse({"error": "Informe um produto para pesquisar."}, status=400)
+
+    store = Store.objects.filter(active=True, slug=store_slug).first()
+    if store is None:
+        return JsonResponse({"error": "Unidade não encontrada."}, status=404)
+
+    if retry_after := search_retry_after(request, query=query):
+        return JsonResponse(
+            {"error": "Muitas buscas em sequência. Aguarde um pouco e tente novamente."},
+            status=429,
+            headers={"Retry-After": str(retry_after)},
+        )
+
+    stores = list(
+        Store.objects.filter(active=True, retailer="lider").order_by("display_order", "pk")
+    ) if store.retailer == "lider" else [store]
+    started = perf_counter()
+    results = search_stores(stores, query)
+    return JsonResponse({
+        "query": query,
+        "units": [present_unit_result(result) for result in results],
+        "elapsed_seconds": round(perf_counter() - started, 2),
     })

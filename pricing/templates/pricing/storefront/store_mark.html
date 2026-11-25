@@ -1,8 +1,8 @@
 {% load static %}
-<span class="market-store-mark" aria-hidden="true">
+<span class="market-store-mark">
   {% if store.logo %}
-    <img src="{% static store.logo %}" width="42" height="42" alt="" loading="lazy">
+    <img src="{% static store.logo %}" width="48" height="48" alt="Logo {{ store.get_retailer_display }}" loading="lazy">
   {% else %}
-    {{ store.get_retailer_display|first }}
+    <span aria-hidden="true">{{ store.get_retailer_display|first }}</span>
   {% endif %}
 </span>

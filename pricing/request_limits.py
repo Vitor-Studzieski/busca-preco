@@ -16,12 +16,19 @@ def client_ip(request):
         return "unknown"
 
 
-def search_retry_after(request):
+def search_retry_after(request, *, query=None):
     window = settings.PRICING_SEARCH_RATE_WINDOW
     limit = settings.PRICING_SEARCH_RATE_LIMIT
     bucket, offset = divmod(int(time()), window)
     identity = sha256(client_ip(request).encode()).hexdigest()
     key = f"search-rate:{identity}:{bucket}"
+    if query is not None:
+        normalized = " ".join(query.casefold().split())[:255]
+        fingerprint = sha256(normalized.encode()).hexdigest()
+        burst_key = f"search-burst:{identity}:{fingerprint}"
+        if not cache.add(burst_key, 1, timeout=3):
+            count = cache.get(key, 0)
+            return window - offset if count > limit else 0
     if cache.add(key, 1, timeout=window + 1):
         count = 1
     else:

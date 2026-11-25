@@ -1,82 +1,129 @@
 {% extends 'pricing/storefront/base.html' %}
+{% load static %}
 {% block title %}Pesquisar preços{% endblock %}
 {% block content %}
 <section class="market-search-page" aria-labelledby="titulo">
+  <p class="market-eyebrow">Consulta de preços ao vivo</p>
   <h1 id="titulo">Pesquisar preços</h1>
-  <p class="market-search-description">Consulte os preços ao vivo nas cinco unidades.</p>
+  <p class="market-search-description">Compare o Super Pompeia com outras unidades em poucos segundos.</p>
   {% include 'pricing/storefront/search.html' %}
-</section>
-
-<section class="market-card market-recent" data-recent-searches hidden aria-labelledby="recentes-titulo">
-  <h2 id="recentes-titulo">Buscas recentes</h2>
-  <ul data-recent-list></ul>
-</section>
-
-{% if query %}
-<section class="market-results" aria-labelledby="resultados-titulo" aria-live="polite">
-  <div class="market-section-heading">
-    <div>
-      <h2 id="resultados-titulo">Resultados para {{ query }}</h2>
-      {% if matching_stores %}
-        <p>Encontramos preços em {{ matching_stores }} unidade{{ matching_stores|pluralize }}.</p>
-      {% else %}
-        <p>Não encontramos este produto nas unidades consultadas.</p>
-      {% endif %}
-    </div>
-    {% if lowest_price %}<span class="market-tag market-tag-blue">Menor preço equivalente · R$ {{ lowest_price|floatformat:"2g" }}</span>{% endif %}
-  </div>
-
-  <div class="market-result-grid">
-    {% for group in groups %}
-    <article class="market-result-card{% if group.store.retailer == 'pompeia' %} market-result-card-primary{% endif %}" aria-labelledby="loja-{{ group.store.pk }}">
-      <header class="market-result-store">
-        {% include 'pricing/storefront/store_mark.html' with store=group.store only %}
-        <div><h3 id="loja-{{ group.store.pk }}">{{ group.store.get_retailer_display }}</h3><span>{{ group.store.unit }}</span></div>
-        {% if group.store.retailer == 'pompeia' %}<span class="market-tag market-tag-blue">Nossa loja</span>{% endif %}
-      </header>
-      <ul class="market-result-list">
-        {% for offer in group.offers %}
-        <li class="market-result-offer">
-          <div class="market-result-product">
-            <strong>{{ offer.name }}</strong>
-            {% if offer.is_multibuy %}
-              <span class="market-tag market-tag-multi">{{ offer.condition }}</span>
-            {% elif offer.is_promotion %}
-              <span class="market-tag market-tag-promo">Promoção</span>
-            {% elif offer.is_club %}
-              <span class="market-tag market-tag-blue">Preço de clube</span>
-            {% endif %}
-            {% if offer.club_price %}<span class="market-club-price">No clube R$ {{ offer.club_price|floatformat:"2g" }}</span>{% endif %}
-            {% if offer.condition_detail %}<span class="market-offer-detail">{{ offer.condition_detail }}</span>{% endif %}
-          </div>
-          <div class="market-result-price">
-            <strong>R$ {{ offer.price|floatformat:"2g" }}{% if offer.unit %}<small> / {{ offer.unit }}</small>{% endif %}</strong>
-            <span>{{ offer.availability }}</span>
-          </div>
-          <div class="market-result-meta">
-            <small>Consulta em {{ offer.observed_at|date:"d/m/Y" }} às {{ offer.observed_at|date:"H:i" }}</small>
-            <a href="{{ offer.url }}" aria-label="Ver {{ offer.name }} no {{ offer.store.get_retailer_display }}">Ver na loja</a>
-          </div>
-        </li>
-        {% empty %}
-        <li class="market-result-empty">{% if group.issue %}{{ group.issue }}{% else %}Produto não localizado nesta unidade.{% endif %}</li>
-        {% endfor %}
-      </ul>
-    </article>
-    {% endfor %}
+  <div class="market-quick-filters" role="group" aria-label="Filtrar unidades comparadas">
+    <span>Comparar:</span>
+    <button type="button" class="market-filter-chip is-selected" data-market-filter="all" aria-pressed="true">Todas</button>
+    <button type="button" class="market-filter-chip" data-market-filter="marilia" aria-pressed="false">Marília</button>
+    <button type="button" class="market-filter-chip" data-market-filter="competitors" aria-pressed="false">Só concorrentes</button>
   </div>
 </section>
-{% endif %}
+
+<section class="market-recent" data-recent-searches hidden aria-labelledby="recentes-titulo">
+  <div class="market-inline-heading">
+    <h2 id="recentes-titulo">Buscas recentes</h2>
+    <button class="market-text-button" type="button" data-clear-recent>Limpar tudo</button>
+  </div>
+  <ul class="market-recent-list" data-recent-list></ul>
+</section>
+
+<section class="market-examples" data-search-examples aria-label="Sugestões de busca">
+  <span>Experimente:</span>
+  <a href="/?q=caf%C3%A9+500g" data-search-example>café 500 g</a>
+  <a href="/?q=leite+integral+1l" data-search-example>leite integral 1 L</a>
+  <a href="/?q=arroz+5kg" data-search-example>arroz 5 kg</a>
+</section>
 
 <section class="market-units" aria-labelledby="unidades-titulo">
-  <h2 id="unidades-titulo">Unidades consultadas</h2>
-  <ul class="market-unit-grid">
+  <div class="market-inline-heading">
+    <div>
+      <h2 id="unidades-titulo">Unidades comparadas</h2>
+      <p class="market-section-note">Os cartões são informativos. O destaque azul marca sua loja de referência.</p>
+    </div>
+  </div>
+  <ul class="market-unit-grid" data-unit-grid>
     {% for store in stores %}
-    <li class="market-unit-card{% if store.retailer == 'pompeia' %} market-unit-card-primary{% endif %}">
+    <li class="market-unit-card{% if store.retailer == 'pompeia' %} market-unit-card-primary{% endif %}"
+        data-store-card data-store-slug="{{ store.slug }}" data-store-retailer="{{ store.retailer }}"
+        data-store-location="{{ store.unit }}" data-reference="{% if store.retailer == 'pompeia' %}true{% else %}false{% endif %}">
       {% include 'pricing/storefront/store_mark.html' with store=store only %}
-      <div><strong>{{ store.get_retailer_display }}</strong><span>{{ store.unit }}</span></div>
+      <div class="market-unit-copy">
+        <strong>{{ store.get_retailer_display }}</strong>
+        <span>{{ store.unit }}</span>
+        {% if store.retailer == 'pompeia' %}<span class="market-tag market-tag-blue">Sua loja</span>{% endif %}
+      </div>
+      <div class="market-unit-status" data-unit-status>Pronta para consulta</div>
+      <button class="market-retry-button" type="button" data-retry-store="{{ store.slug }}" hidden>Tentar novamente</button>
     </li>
     {% endfor %}
   </ul>
 </section>
+
+<section class="market-results" data-results data-initial-elapsed="{{ elapsed_seconds|default:0 }}" {% if not query %}hidden{% endif %} aria-labelledby="resultados-titulo">
+  <header class="market-results-header">
+    <div>
+      <p class="market-eyebrow">Comparação por produto</p>
+      <h2 id="resultados-titulo" data-query-title>{% if query %}Resultados para {{ query }}{% else %}Resultados{% endif %}</h2>
+      <p class="market-result-meta" data-result-meta aria-live="polite">
+        {% if query %}Carregando resultados iniciais…{% else %}Pesquise para ver os preços por unidade.{% endif %}
+      </p>
+    </div>
+    <div class="market-result-actions">
+      <label class="market-sort-control">Ordenar por
+        <select data-sort>
+          <option value="price">Menor preço</option>
+          <option value="savings">Maior diferença</option>
+          <option value="name">Nome</option>
+        </select>
+      </label>
+      <div class="market-view-toggle" role="group" aria-label="Formato dos resultados">
+        <button type="button" data-view="cards" aria-pressed="true">Cards</button>
+        <button type="button" data-view="table" aria-pressed="false">Tabela</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="market-results-tools">
+    <label class="market-checkbox">
+      <input type="checkbox" data-all-units>
+      <span>Encontrados em todas as unidades</span>
+    </label>
+    <span class="market-reference-note">Diferenças calculadas em relação ao preço do Super Pompeia.</span>
+    <button class="market-text-button" type="button" data-retry-all hidden>Tentar novamente nas unidades com falha</button>
+  </div>
+
+  <div class="market-progress" data-progress role="status" aria-live="polite" hidden>
+    <span class="market-progress-bar" aria-hidden="true"><span data-progress-bar></span></span>
+    <span data-progress-text></span>
+  </div>
+  <p class="market-partial-message" data-partial-message role="status" hidden></p>
+  <div class="market-empty-state" data-empty-state hidden role="status"></div>
+  <div class="market-products" data-products data-view="cards" aria-live="polite"></div>
+</section>
+
+<noscript>
+  {% if query %}
+  <section class="market-noscript-results" aria-labelledby="sem-script-titulo">
+    <h2 id="sem-script-titulo">Resultados para {{ query }}</h2>
+    <p>Comparação carregada no servidor para esta busca.</p>
+    <div class="market-result-grid">
+      {% for group in groups %}
+      <article class="market-result-card{% if group.store.retailer == 'pompeia' %} market-result-card-primary{% endif %}">
+        <header class="market-result-store">
+          {% include 'pricing/storefront/store_mark.html' with store=group.store only %}
+          <div><h3>{{ group.store.get_retailer_display }}</h3><span>{{ group.store.unit }}</span></div>
+          {% if group.store.retailer == 'pompeia' %}<span class="market-tag market-tag-blue">Sua loja</span>{% endif %}
+        </header>
+        <ul>
+          {% for offer in group.offers %}
+          <li class="market-result-empty"><strong>{{ offer.name }}</strong> · R$ {{ offer.price|floatformat:"2g" }}{% if offer.unit %} / {{ offer.unit }}{% endif %}</li>
+          {% empty %}
+          <li class="market-result-empty">{% if group.issue %}{{ group.issue }}{% else %}Produto não localizado nesta unidade.{% endif %}</li>
+          {% endfor %}
+        </ul>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+  {% else %}
+  <p class="market-noscript">Ative o JavaScript do navegador para carregar as consultas ao vivo por unidade.</p>
+  {% endif %}
+</noscript>
+{{ initial_results|json_script:"initial-results" }}
 {% endblock %}

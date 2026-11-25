@@ -7,10 +7,11 @@ Busca pública de preços para o Super Pompeia L02, na cidade de Pompéia, e qua
 - Django 5.2 e Python 3.13 servem as páginas e fazem as consultas.
 - `pricing/markets.sqlite3` guarda somente o cadastro das cinco unidades e é aberto em modo somente leitura.
 - Cada busca consulta ao vivo os sites oficiais das lojas. Na Pompéia L02, o catálogo público fornece produtos, preços e ofertas. O sistema não armazena preços, histórico ou promoções no servidor.
-- As buscas recentes ficam somente no armazenamento local do navegador.
+- A tela consulta as unidades em paralelo pela rota JSON `GET /api/search/?q=<produto>&store=<slug>`. Cada resposta atualiza a comparação sem esperar as outras lojas; as duas unidades Super Líder compartilham uma consulta para preservar a busca de produtos comuns.
+- As buscas recentes ficam somente no armazenamento local do navegador, com limite de oito itens e remoção individual ou total.
 - Não há dashboard interno, login de compradores, fila ou worker contínuo.
 
-O resultado depende de cada supermercado responder às consultas. Uma busca pode levar alguns segundos e uma loja pode limitar o acesso.
+O resultado depende de cada supermercado responder às consultas. A tela mostra resultados parciais, sinaliza lentidão ou falhas e permite tentar novamente uma unidade. Uma busca pode levar alguns segundos e uma loja pode limitar o acesso.
 
 ## Rodar localmente
 
