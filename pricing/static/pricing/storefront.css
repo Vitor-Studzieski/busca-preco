@@ -82,6 +82,9 @@ img { display: block; max-width: 100%; }
 .market-section-heading p { margin-top: .3rem; color: var(--muted); }
 .market-result-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .85rem; }
 .market-result-card { min-width: 0; overflow: hidden; border: 1px solid var(--line); border-radius: .9rem; background: var(--white); }
+.market-result-card-primary { border-color: var(--blue); box-shadow: 0 5px 20px rgb(16 70 211 / 13%); }
+.market-result-card-primary .market-result-store { background: var(--blue-soft); border-color: #c8d6ff; }
+.market-result-card-primary .market-result-price > strong { color: var(--blue-deep); font-size: 1.25rem; }
 .market-result-store { display: flex; align-items: center; gap: .7rem; padding: .85rem .95rem; border-bottom: 1px solid var(--line); }
 .market-result-store > div:last-child, .market-unit-card > div:last-child { display: grid; min-width: 0; }
 .market-result-store h3 { font-size: 1rem; line-height: 1.25; }
@@ -104,10 +107,12 @@ img { display: block; max-width: 100%; }
 .market-tag-promo { background: var(--red-soft); color: var(--red); }
 .market-tag-multi { background: var(--orange-soft); color: var(--orange); }
 .market-club-price { color: var(--blue-deep); font-size: .84rem; font-weight: 700; }
+.market-offer-detail { color: var(--muted); font-size: .8rem; }
 
 .market-units { margin-top: 2.1rem; }
 .market-unit-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .75rem; margin-top: .8rem; }
 .market-unit-card { display: flex; min-width: 0; align-items: center; gap: .7rem; padding: .75rem; border: 1px solid var(--line); border-radius: .85rem; background: var(--white); }
+.market-unit-card-primary { border-color: #a9bfff; background: var(--blue-soft); }
 .market-unit-card strong { overflow-wrap: anywhere; }
 
 .market-footer { border-top: 1px solid var(--line); background: var(--white); color: var(--muted); }

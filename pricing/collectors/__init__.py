@@ -3,6 +3,7 @@ from functools import partial
 from .discovery import MAX_DISCOVERY_LINKS, discover_product_urls
 from .extract import CollectedOffer, parse_offer
 from .http import CollectionError, fetch_html, validate_product_url
+from .onlinesim import search_pompeia_catalog
 
 __all__ = [
     "MAX_DISCOVERY_LINKS",
@@ -10,6 +11,7 @@ __all__ = [
     "CollectionError",
     "collect_offer",
     "discover_product_urls",
+    "search_pompeia_catalog",
     "validate_product_url",
 ]
 

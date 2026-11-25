@@ -13,7 +13,7 @@ from django.conf import settings
 from django.core.cache import caches
 from django.utils import timezone
 
-from .collectors import CollectedOffer, CollectionError, collect_offer
+from .collectors import CollectedOffer, CollectionError, collect_offer, search_pompeia_catalog
 from .collectors.http import storefront_deadline
 from .collectors.search import search_catalog
 from .identifiers import normalize_gtin, search_text
@@ -204,6 +204,9 @@ def search_unit(store, query, *, deadline=None):
     pages = 0
     deadline = monotonic() + 16 if deadline is None else deadline
 
+    if store.retailer == "pompeia":
+        return search_pompeia_unit(store, query, deadline)
+
     for term in query.vendor_terms(store.retailer):
         if offers or len(tried_urls) >= MAX_DETAILS:
             break
@@ -252,10 +255,47 @@ def search_unit(store, query, *, deadline=None):
                        issue, tuple(unpriced[:MAX_OFFERS]))
 
 
+def search_pompeia_unit(store, query, deadline):
+    """Use the Pompéia catalog's public product search API for its own unit."""
+    offers = []
+    codes = set()
+    issue = ""
+    terms = query.vendor_terms(store.retailer)
+    for term in terms[:2]:
+        if monotonic() >= deadline:
+            break
+        try:
+            products = search_pompeia_catalog(store.url, store.external_id, term)
+        except CollectionError as error:
+            issue = str(error)
+            if error.status in LIMITED_ACCESS:
+                break
+            continue
+
+        candidates = sorted(
+            (offer for offer in products if query.candidate(offer.name)),
+            key=lambda offer: query.rank(offer.name),
+        )
+        for product in candidates:
+            if len(offers) >= MAX_OFFERS:
+                break
+            if product.external_code in codes or not query.confirms(product):
+                continue
+            offers.append(SearchOffer(product))
+            codes.add(product.external_code)
+        if offers:
+            break
+
+    if monotonic() >= deadline and not offers:
+        issue = TIMEOUT_ISSUE
+    return StoreSearch(store, tuple(offers), timezone.now() if offers else None, issue)
+
+
 def search_cache_key(store, query):
     # Keep the retailer's ID exact and normalize only equivalent quantities.
     measures = tuple((unit, str(quantity.normalize())) for unit, quantity in query.measures)
-    identity = (store.slug, store.retailer, store.url, query.terms, measures, query.code)
+    identity = (store.slug, store.retailer, store.url, store.external_id,
+                query.terms, measures, query.code)
     return "market-search:v1:" + sha256(repr(identity).encode()).hexdigest()
 
 

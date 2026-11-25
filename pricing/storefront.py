@@ -37,6 +37,7 @@ class MarketOffer:
     observed_at: datetime
     gtin: str
     club_price: Decimal | None
+    condition_detail: str
 
     @property
     def is_multibuy(self):
@@ -68,6 +69,7 @@ def to_market_offer(result_offer, store, observed_at):
         observed_at=observed_at,
         gtin=normalize_gtin(collected.gtin) if collected.gtin else "",
         club_price=collected.club_price,
+        condition_detail=collected.condition_detail,
     )
 
 

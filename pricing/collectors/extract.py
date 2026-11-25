@@ -19,6 +19,7 @@ class CollectedOffer:
     url: str
     club_price: Decimal | None = None
     price_unit: str = ""
+    condition_detail: str = ""
 
 
 class ProductPage(HTMLParser):

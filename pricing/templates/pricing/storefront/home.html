@@ -3,7 +3,7 @@
 {% block content %}
 <section class="market-search-page" aria-labelledby="titulo">
   <h1 id="titulo">Pesquisar preços</h1>
-  <p class="market-search-description">Consulte os preços ao vivo nas quatro unidades.</p>
+  <p class="market-search-description">Consulte os preços ao vivo nas cinco unidades.</p>
   {% include 'pricing/storefront/search.html' %}
 </section>
 
@@ -28,10 +28,11 @@
 
   <div class="market-result-grid">
     {% for group in groups %}
-    <article class="market-result-card" aria-labelledby="loja-{{ group.store.pk }}">
+    <article class="market-result-card{% if group.store.retailer == 'pompeia' %} market-result-card-primary{% endif %}" aria-labelledby="loja-{{ group.store.pk }}">
       <header class="market-result-store">
         {% include 'pricing/storefront/store_mark.html' with store=group.store only %}
         <div><h3 id="loja-{{ group.store.pk }}">{{ group.store.get_retailer_display }}</h3><span>{{ group.store.unit }}</span></div>
+        {% if group.store.retailer == 'pompeia' %}<span class="market-tag market-tag-blue">Nossa loja</span>{% endif %}
       </header>
       <ul class="market-result-list">
         {% for offer in group.offers %}
@@ -46,6 +47,7 @@
               <span class="market-tag market-tag-blue">Preço de clube</span>
             {% endif %}
             {% if offer.club_price %}<span class="market-club-price">No clube R$ {{ offer.club_price|floatformat:"2g" }}</span>{% endif %}
+            {% if offer.condition_detail %}<span class="market-offer-detail">{{ offer.condition_detail }}</span>{% endif %}
           </div>
           <div class="market-result-price">
             <strong>R$ {{ offer.price|floatformat:"2g" }}{% if offer.unit %}<small> / {{ offer.unit }}</small>{% endif %}</strong>
@@ -70,7 +72,7 @@
   <h2 id="unidades-titulo">Unidades consultadas</h2>
   <ul class="market-unit-grid">
     {% for store in stores %}
-    <li class="market-unit-card">
+    <li class="market-unit-card{% if store.retailer == 'pompeia' %} market-unit-card-primary{% endif %}">
       {% include 'pricing/storefront/store_mark.html' with store=store only %}
       <div><strong>{{ store.get_retailer_display }}</strong><span>{{ store.unit }}</span></div>
     </li>

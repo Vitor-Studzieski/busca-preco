@@ -1,3 +1,4 @@
+import json
 import re
 import socket
 from collections.abc import Callable
@@ -21,6 +22,11 @@ class CollectionError(ValueError):
 
 CONFIANCA_PRODUCT_PATH = re.compile(r"p/((?:[a-zA-Z0-9_-]|%[a-fA-F0-9]{2})+)/([a-zA-Z0-9_-]+)")
 STOREFRONTS = {
+    "pompeia": (
+        {"onlinesim.com.br", "www.onlinesim.com.br"},
+        {"/pompeia"},
+        re.compile(r"(?:details/[0-9]{1,32}|search/(?:[A-Za-z0-9._~-]|%[a-fA-F0-9]{2})+)"),
+    ),
     "lider": (
         {"smlider.com.br", "www.smlider.com.br"},
         {"/1", "/2"},
@@ -203,6 +209,51 @@ def fetch_html(page_url: str, validate_url: Callable[[str], str]) -> tuple[str, 
             raise
         sleep(0.2)
         return open_html(opener, request, validate_url, deadline)
+
+
+def fetch_json(page_url: str, validate_url: Callable[[str], str], *, body: dict,
+               headers: dict[str, str]) -> dict:
+    """Fetch a bounded JSON response from a validated public HTTPS endpoint."""
+    page_url = validate_url(page_url)
+    deadline = DEADLINE.get()
+    opener = build_opener(ProxyHandler({}), StorefrontRedirectHandler(validate_url), PublicHTTPSHandler())
+    request_headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "User-Agent": "BuscaPreco/0.1",
+        **headers,
+    }
+    request = Request(page_url, data=json.dumps(body, ensure_ascii=False).encode("utf-8"),
+                      headers=request_headers, method="POST")
+    pace_http(urlsplit(request.full_url).hostname, deadline)
+    timeout = 12 if deadline is None else min(5, remaining_time(deadline))
+    try:
+        with opener.open(request, timeout=timeout) as response:
+            validate_url(response.geturl())
+            content_type = response.headers.get_content_type()
+            if content_type != "application/json" and not content_type.endswith("+json"):
+                raise CollectionError("A loja não retornou dados de preço em JSON.")
+            data = read_html(response, deadline)
+            if len(data) > MAX_RESPONSE_BYTES:
+                raise CollectionError("A resposta da loja excedeu o tamanho aceito.")
+            try:
+                value = json.loads(data.decode(response.headers.get_content_charset() or "utf-8"))
+            except (UnicodeError, json.JSONDecodeError) as error:
+                raise CollectionError("A loja retornou dados de preço inválidos.") from error
+            if not isinstance(value, dict):
+                raise CollectionError("A loja retornou dados de preço inválidos.")
+            return value
+    except HTTPError as error:
+        if error.code in {401, 403, 429}:
+            message = f"A loja limitou ou recusou o acesso (HTTP {error.code})."
+        else:
+            message = f"A loja respondeu com HTTP {error.code}."
+        error.close()
+        raise CollectionError(message, status=error.code) from error
+    except TimeoutError as error:
+        raise CollectionError("A loja não respondeu no tempo disponível.", temporary=True) from error
+    except (OSError, HTTPException, LookupError) as error:
+        raise CollectionError("Não foi possível abrir o catálogo da loja.", temporary=True) from error
 
 
 def open_html(opener, request, validate_url, deadline):

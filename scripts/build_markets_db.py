@@ -17,6 +17,7 @@ def main():
                 retailer TEXT NOT NULL,
                 unit TEXT NOT NULL,
                 url TEXT NOT NULL,
+                external_id TEXT NOT NULL DEFAULT '',
                 active INTEGER NOT NULL,
                 logo TEXT NOT NULL,
                 display_order INTEGER NOT NULL
@@ -25,8 +26,8 @@ def main():
         )
         connection.executemany(
             """
-            INSERT INTO markets (slug, retailer, unit, url, active, logo, display_order)
-            VALUES (?, ?, ?, ?, 1, ?, ?)
+            INSERT INTO markets (slug, retailer, unit, url, external_id, active, logo, display_order)
+            VALUES (?, ?, ?, ?, ?, 1, ?, ?)
             """,
             MARKETS,
         )
