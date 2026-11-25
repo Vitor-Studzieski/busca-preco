@@ -1,0 +1,87 @@
+{% extends 'pricing/storefront/base.html' %}
+{% block title %}Comparar preços{% endblock %}
+{% block content %}
+<header class="market-page-intro market-compare-intro">
+  <div>
+    <h1>Comparar preços</h1>
+    <p>Pesquise ao vivo nos mercados de {{ location }}.</p>
+  </div>
+  {% include 'pricing/storefront/search.html' %}
+</header>
+{% if store_options %}
+<form class="market-store-filter" action="{% url 'pricing:storefront_compare' %}" method="get">
+  <input type="hidden" name="cidade" value="{{ city_key }}">
+  {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
+  <fieldset>
+    <legend>Unidades para consultar (até {{ market_limit }})</legend>
+    {% for store in store_options %}<label><input type="checkbox" name="loja" value="{{ store.pk }}"{% if store.pk in selected_ids %} checked{% endif %}> {{ store.get_retailer_display }} · {{ store.unit }}</label>{% endfor %}
+  </fieldset>
+  <button class="market-outline-link" type="submit">Aplicar</button>
+</form>
+{% endif %}
+
+<section class="market-block market-results" aria-labelledby="resultados">
+  {% if query %}
+  <div class="market-section-heading">
+    <div>
+      <h2 id="resultados">{{ query }}</h2>
+      {% if matching_stores %}
+      <p>Consulta feita agora em {{ matching_stores }} mercado{{ matching_stores|pluralize }}. Confira marca e embalagem.</p>
+      {% else %}
+      <p>Não encontramos esse produto nos mercados selecionados. Você pode tentar outro termo.</p>
+      {% endif %}
+    </div>
+    {% if lowest_price %}<span class="market-tag market-tag-blue">Menor preço equivalente · R$ {{ lowest_price|floatformat:"2g" }}</span>{% endif %}
+  </div>
+  {% if groups %}
+  <div class="market-quote-board">
+    {% for group in groups %}
+    <article class="market-quote" aria-labelledby="loja-{{ group.store.pk }}">
+      <header class="market-quote-store">
+        {% include 'pricing/storefront/store_mark.html' with store=group.store only %}
+        <div><h3 id="loja-{{ group.store.pk }}">{{ group.store.get_retailer_display }}</h3><span>{{ group.store.unit }}</span></div>
+      </header>
+      <ul class="market-quote-list">
+        {% for offer in group.offers %}
+        <li class="market-quote-offer">
+          <div class="market-quote-product">
+            <strong>{{ offer.name }}</strong>
+            {% if offer.is_multibuy %}
+              <span class="market-tag market-tag-multi">{{ offer.condition }}</span>
+            {% elif offer.is_promotion %}
+              <span class="market-tag market-tag-promo">Promoção</span>
+            {% elif offer.is_club %}
+              <span class="market-tag market-tag-blue">Preço de clube</span>
+            {% endif %}
+            {% if offer.club_price %}<span class="market-club-price">No clube R$ {{ offer.club_price|floatformat:"2g" }}</span>{% endif %}
+          </div>
+          <div class="market-quote-price">
+            <strong>R$ {{ offer.price|floatformat:"2g" }}{% if offer.unit %}<small> / {{ offer.unit }}</small>{% endif %}</strong>
+            <span>{{ offer.availability }}</span>
+          </div>
+          <div class="market-quote-time">
+            <small>Consulta em {{ offer.observed_at|date:"d/m/Y" }} às {{ offer.observed_at|date:"H:i" }}</small>
+            <a class="market-text-link" href="{{ offer.url }}" aria-label="Ver {{ offer.name }} no {{ offer.store.get_retailer_display }}">Ver na loja</a>
+          </div>
+        </li>
+        {% empty %}
+        <li class="market-quote-no-price">{% if group.issue %}{{ group.issue }}{% else %}Produto não localizado nesta unidade.{% endif %}</li>
+        {% endfor %}
+      </ul>
+    </article>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% else %}
+  <div class="market-empty market-empty-start">
+    <h2 id="resultados">Qual produto você quer comparar?</h2>
+    <p>A busca consulta os sites das lojas e pode levar alguns segundos.</p>
+  </div>
+  {% endif %}
+</section>
+
+<section class="market-block market-recent" data-recent-searches hidden aria-labelledby="recentes-titulo">
+  <h2 id="recentes-titulo">Buscas recentes neste navegador</h2>
+  <ul data-recent-list></ul>
+</section>
+{% endblock %}

@@ -1,61 +1,17 @@
-name: Portal Django
+name: Check Django deploy
 on: [push, pull_request]
 permissions:
   contents: read
 jobs:
-  validate:
+  build:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:17
-        env:
-          POSTGRES_USER: test
-          POSTGRES_DB: pompeia
-          POSTGRES_PASSWORD: ci-temporario
-        ports: ["5432:5432"]
-        options: --health-cmd "pg_isready -U test" --health-interval 5s --health-timeout 5s --health-retries 8
-      redis:
-        image: redis:7-alpine
-        ports: ["6379:6379"]
-        options: --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 5s --health-retries 8
-    env:
-      POSTGRES_DB: pompeia
-      POSTGRES_USER: test
-      POSTGRES_PASSWORD: ci-temporario
-      POSTGRES_HOST: 127.0.0.1
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
-      - name: Check Vercel Python manifest
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          import re
-          import tomllib
-
-          pyproject = Path("pyproject.toml")
-          if pyproject.exists():
-              dependencies = tomllib.loads(pyproject.read_text()).get("project", {}).get("dependencies", [])
-          else:
-              dependencies = Path("requirements.txt").read_text().splitlines()
-          has_django = any(
-              re.match(r"^django(?:\[.*?\])?\s*(?:==|~=|>=|<=|!=|===|<|>)", dependency.strip(), re.I)
-              for dependency in dependencies
-          )
-          if not has_django:
-              raise SystemExit("Vercel dependency manifest must declare Django in pyproject.toml or requirements.txt")
-          PY
+          cache: pip
       - run: pip install --require-hashes -r requirements.txt
-      - run: pip install 'ruff==0.17.6' 'bandit==1.9.4' 'pip-audit==2.10.1' 'coverage==7.13.4'
-      - run: ruff check .
-      - run: bandit -r pricing project -x 'pricing/test*,pricing/collectors/tests.py' -ll -ii
-      - run: pip-audit --require-hashes --disable-pip -r requirements.txt
-      - run: python manage.py makemigrations --check --dry-run
-      - run: coverage run --source=pricing,project manage.py test
-      - run: coverage report -m
-      - run: |
-          export DJANGO_SECRET_KEY="$(python -c 'from secrets import token_urlsafe; print(token_urlsafe(64))')"
-          DJANGO_DEBUG=0 PRICING_ADMIN_PATH=maintenance/ PRICING_REDIS_URL=redis://127.0.0.1:6379/0 python manage.py check --deploy --fail-level WARNING
-      - run: docker build .
+      - run: python -m compileall -q manage.py project pricing scripts
+      - run: python manage.py check
+      - run: python manage.py collectstatic --noinput

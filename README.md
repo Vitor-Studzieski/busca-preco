@@ -1,36 +1,38 @@
-# Precificação do Supermercado Pompeia
+# busca-preço
 
-Portal interno para dois compradores pesquisarem preços no Super Líder de Pompéia e Herculândia, Tauste de Marília e Confiança de Marília. A pesquisa abre com o último preço confirmado no banco e atualiza cada unidade em segundo plano. A primeira fase usa dados dos concorrentes. O catálogo e os preços do Pompeia entram em uma etapa posterior.
+Comparador público de preços para quatro unidades de supermercados em Marília e região. O site mantém o layout azul da vitrine, permite pesquisar e comparar produtos e mostra as condições promocionais encontradas na consulta.
 
-- [Operação e migração](docs/runbook.md)
-- [Implantação na Vercel](docs/deploy-vercel.md)
-- [Auditoria](docs/auditoria.md)
-- [Avaliação e plano incremental](docs/melhorias-radar-precos.md)
-- [Contexto original da solicitação](docs/contexto/solicitacao-2026-11-24/README.md)
-- [Desempenho](docs/baseline-desempenho.md)
-- [Segurança](docs/seguranca.md)
-- [Arquitetura da fila](docs/adr/0001-portal-e-fila.md)
-- [Sessões persistentes](docs/adr/0002-sessoes.md)
-- [Arquitetura PostgreSQL e Vercel](docs/adr/0003-postgresql-vercel.md)
+## Estrutura
 
-## Ambiente de desenvolvimento
+- Django 5.2 e Python 3.13 servem as páginas e fazem as consultas.
+- `pricing/markets.sqlite3` guarda somente o cadastro das quatro unidades e é aberto em modo somente leitura.
+- Cada busca consulta ao vivo os sites oficiais das lojas. O sistema não armazena preços, histórico ou promoções no servidor.
+- As buscas recentes ficam somente no armazenamento local do navegador.
+- Não há dashboard interno, login de compradores, fila ou worker contínuo.
 
-O Compose usa Python 3.13, PostgreSQL e Redis. Ele aplica as migrations e inicia o portal e o worker automaticamente. O banco começa novo; os dados do SQLite antigo não são importados.
+O resultado depende de cada supermercado responder às consultas. Uma busca pode levar alguns segundos e uma loja pode limitar o acesso.
 
-Com o Docker Desktop aberto, execute na pasta do projeto:
+## Rodar localmente
 
-    docker compose -f compose.dev.yaml up --build --wait
+Use Python 3.13 e instale as dependências:
 
-Abra [o portal local](http://127.0.0.1:8000/). Na primeira inicialização, crie uma conta administrativa:
+```sh
+python3.13 -m venv .venv
+source .venv/bin/activate
+pip install --require-hashes -r requirements.txt
+python manage.py runserver 8000
+```
 
-    docker compose -f compose.dev.yaml exec web python manage.py createsuperuser
+Abra <http://127.0.0.1:8000/>. O projeto não precisa de PostgreSQL, Redis, Docker ou variáveis secretas.
 
-Depois de entrar, cadastre os compradores pela opção de cadastro do portal. Para acompanhar os logs:
+Para atualizar os quatro cadastros, edite `pricing/market_data.py` e gere novamente o banco:
 
-    docker compose -f compose.dev.yaml logs -f web worker
+```sh
+python -m scripts.build_markets_db
+```
 
-Para parar os serviços:
+Esse comando recria `pricing/markets.sqlite3` com apenas os quatro mercados configurados.
 
-    docker compose -f compose.dev.yaml down
+## Vercel
 
-O volume do PostgreSQL continua disponível na próxima inicialização. O arquivo db.sqlite3 local não é usado pela aplicação.
+O Django é detectado pelo `manage.py`. O SQLite incluído no repositório é somente de leitura e guarda configuração estática, não dados de usuários ou preços. Não são necessárias variáveis de banco, Redis, migrations de produção ou serviços externos. A consulta aos sites das lojas acontece dentro da requisição; a saída de rede dos supermercados precisa estar acessível à Vercel.

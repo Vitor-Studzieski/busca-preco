@@ -1,0 +1,52 @@
+{% load static %}<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#1046d3">
+  <title>{% block title %}Compare preços de supermercado{% endblock %} | busca-preço</title>
+  <link rel="stylesheet" href="{% static 'pricing/storefront.css' %}">
+</head>
+<body>
+  <a class="market-skip" href="#conteudo">Pular para o conteúdo</a>
+  {% with page=request.resolver_match.url_name %}
+  <header class="market-header">
+    <div class="market-shell market-header-inner">
+      <a class="market-brand" href="{% url 'pricing:storefront' %}{% if scope_query %}?{{ scope_query }}{% endif %}">
+        <span class="market-brand-icon" aria-hidden="true"></span>busca<span>-preço</span>
+      </a>
+      <nav class="market-nav" aria-label="Navegação principal">
+        <a href="{% url 'pricing:storefront' %}{% if scope_query %}?{{ scope_query }}{% endif %}"{% if page == 'storefront' %} aria-current="page"{% endif %}>Início</a>
+        <a href="{% url 'pricing:storefront_compare' %}{% if scope_query %}?{{ scope_query }}{% endif %}"{% if page == 'storefront_compare' %} aria-current="page"{% endif %}>Comparar</a>
+        <a href="{% url 'pricing:storefront_promotions' %}{% if scope_query %}?{{ scope_query }}{% endif %}"{% if page == 'storefront_promotions' %} aria-current="page"{% endif %}>Promoções</a>
+      </nav>
+      {% if cities %}
+      <details class="market-location">
+        <summary>
+          <svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 5-6 10.2-7.4 11.4a.9.9 0 0 1-1.2 0C10 20.2 4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+          <span><small>Mercados em</small><strong>{{ location }}</strong></span>
+          <span class="market-chevron" aria-hidden="true"></span>
+        </summary>
+        <ul class="market-location-list" aria-label="Escolher cidade">
+          {% for city in cities %}
+          <li><a href="{{ city.url }}"{% if city.key == city_key %} aria-current="true"{% endif %}>{{ city.name }}</a></li>
+          {% endfor %}
+        </ul>
+      </details>
+      {% endif %}
+    </div>
+  </header>
+  {% endwith %}
+  <main id="conteudo" class="market-shell market-main" tabindex="-1">
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="market-footer">
+    <div class="market-shell market-footer-inner">
+      <span class="market-footer-brand">busca-preço</span>
+      <span>Preços e disponibilidade podem mudar após a consulta.</span>
+      <span>Consulta direta aos sites das lojas.</span>
+    </div>
+  </footer>
+  <script defer src="{% static 'pricing/recent-searches.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+{% extends 'pricing/storefront/base.html' %}
+{% block title %}Promoções{% endblock %}
+{% block content %}
+<header class="market-page-intro market-promotions-intro">
+  <div>
+    <h1>Promoções{% if location %} em {{ location }}{% endif %}</h1>
+    <p>Pesquise um produto para consultar ofertas atuais nos supermercados.</p>
+  </div>
+  <div class="market-promo-stamp" aria-hidden="true">%</div>
+  {% include 'pricing/storefront/search.html' %}
+</header>
+<section class="market-block market-promotion-results" aria-label="Ofertas por tipo">
+  <nav class="market-filters" aria-label="Tipos de oferta">
+    <a href="{% url 'pricing:storefront_promotions' %}?{{ scope_query }}{% if query %}&amp;q={{ query|urlencode }}{% endif %}"{% if not kind %} aria-current="page"{% endif %}>Todas</a>
+    <a class="market-filter-promo" href="{% url 'pricing:storefront_promotions' %}?tipo=promocao&amp;cidade={{ city_key }}{% if query %}&amp;q={{ query|urlencode }}{% endif %}"{% if kind == 'promocao' %} aria-current="page"{% endif %}>Promoção</a>
+    <a class="market-filter-multi" href="{% url 'pricing:storefront_promotions' %}?tipo=clube&amp;cidade={{ city_key }}{% if query %}&amp;q={{ query|urlencode }}{% endif %}"{% if kind == 'clube' %} aria-current="page"{% endif %}>Preço de clube</a>
+  </nav>
+  {% if offers %}
+  <div class="market-offer-grid">{% for offer in offers %}{% include 'pricing/storefront/promo_card.html' %}{% endfor %}</div>
+  {% else %}
+  <div class="market-empty">
+    {% if query %}
+      <h2>Nenhuma promoção confirmada para {{ query }}</h2>
+      <p>Confira os preços na página Comparar ou tente outro nome de produto.</p>
+    {% else %}
+      <h2>Pesquise um produto para ver promoções</h2>
+      <p>Os preços são consultados ao vivo e não ficam armazenados no sistema.</p>
+    {% endif %}
+  </div>
+  {% endif %}
+</section>
+<section class="market-block market-recent" data-recent-searches hidden aria-labelledby="recentes-titulo">
+  <h2 id="recentes-titulo">Buscas recentes neste navegador</h2>
+  <ul data-recent-list></ul>
+</section>
+{% endblock %}

@@ -1,21 +1,10 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "regions": [
-    "gru1"
-  ],
-  "daemons": {
-    "collection-worker": {
-      "root": ".",
-      "entrypoint": "Dockerfile",
-      "command": [
-        "python",
-        "manage.py",
-        "collection_worker"
-      ],
-      "instances": {
-        "gru1": 1
-      },
-      "terminationGracePeriodSeconds": 60
+  "functions": {
+    "manage.py": {
+      "includeFiles": "{pricing/markets.sqlite3,pricing/templates/**/*.html}",
+      "excludeFiles": "{docs/**,.github/**,scripts/**,pricing/collectors/tests.py}",
+      "maxDuration": 60
     }
   }
 }

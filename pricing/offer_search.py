@@ -17,7 +17,19 @@ from .collectors import CollectedOffer, CollectionError, collect_offer
 from .collectors.http import storefront_deadline
 from .collectors.search import search_catalog
 from .identifiers import normalize_gtin, search_text
-from .models import Observation, Store
+from .models import Store
+
+CONDITION_LABELS = {
+    "regular": "Regular",
+    "promotion": "Promoção",
+    "club": "Clube",
+    "unknown": "Condição não identificada",
+}
+AVAILABILITY_LABELS = {
+    "available": "Disponível",
+    "unavailable": "Indisponível",
+    "unknown": "Estoque não informado",
+}
 
 MEASURE = re.compile(
     r"(?<![a-z0-9])(\d+(?:[.,]\d+)?)\s*-?\s*"
@@ -160,11 +172,11 @@ class SearchOffer:
 
     @property
     def condition(self):
-        return Observation.Condition(self.collected.condition).label
+        return CONDITION_LABELS.get(self.collected.condition, CONDITION_LABELS["unknown"])
 
     @property
     def availability(self):
-        return Observation.Availability(self.collected.availability).label
+        return AVAILABILITY_LABELS.get(self.collected.availability, AVAILABILITY_LABELS["unknown"])
 
 
 @dataclass(frozen=True)

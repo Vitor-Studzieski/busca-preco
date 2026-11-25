@@ -1,8 +1,0 @@
-<form class="search-bar" method="get" action="{% url 'pricing:search' %}" role="search">
-  <label class="sr-only" for="product-query">{% if own_enabled %}Produto, SKU ou EAN{% else %}Produto ou código de barras{% endif %}</label>
-  <span class="nav-icon icon-search search-icon" aria-hidden="true"></span>
-  <input id="product-query" type="search" name="q" value="{{ query }}" placeholder="{% if own_enabled %}Produto, SKU ou EAN{% else %}Nome, marca, embalagem ou código de barras{% endif %}" maxlength="255" required list="product-suggestions" data-suggestions="{% url 'pricing:suggestions' %}">
-  <datalist id="product-suggestions"></datalist>
-  <kbd aria-hidden="true">/</kbd>
-  <button class="primary" type="submit">Buscar</button>
-</form>

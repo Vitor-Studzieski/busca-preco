@@ -1,9 +1,0 @@
-{$PORTAL_HOST} {
-    @office remote_ip {$PORTAL_OFFICE_CIDRS}
-    handle @office {
-        reverse_proxy web:8000
-    }
-    handle {
-        respond 403
-    }
-}

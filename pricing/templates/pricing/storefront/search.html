@@ -1,0 +1,12 @@
+<form class="market-search" method="get" action="{% url search_action %}" aria-label="Buscar preços">
+  {% if city_key %}<input type="hidden" name="cidade" value="{{ city_key }}">{% endif %}
+  {% if store_options %}
+    {% for store in stores %}<input type="hidden" name="loja" value="{{ store.pk }}">{% endfor %}
+  {% endif %}
+  <label class="market-search-field">
+    <span class="market-sr-only">Nome do produto</span>
+    <svg aria-hidden="true" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="10.7" cy="10.7" r="6.6"/><path d="m16 16 4.5 4.5"/></svg>
+    <input type="search" name="q" value="{{ query|default:'' }}" placeholder="Ex.: café 500 g" maxlength="255" required>
+  </label>
+  <button type="submit">Buscar preços</button>
+</form>
