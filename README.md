@@ -1,6 +1,6 @@
 # busca-preço
 
-Comparador público de preços para quatro unidades de supermercados em Marília e região. O site mantém o layout azul da vitrine, permite pesquisar e comparar produtos e mostra as condições promocionais encontradas na consulta.
+Busca pública de preços para quatro unidades de supermercados em Marília e região. A interface tem uma única tela de pesquisa; os resultados e as condições promocionais aparecem na mesma página.
 
 ## Estrutura
 

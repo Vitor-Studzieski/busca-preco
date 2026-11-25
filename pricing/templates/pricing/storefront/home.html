@@ -1,51 +1,80 @@
 {% extends 'pricing/storefront/base.html' %}
-{% load static %}
+{% block title %}Pesquisar preços{% endblock %}
 {% block content %}
-<section class="market-hero" aria-labelledby="titulo">
-  <div class="market-hero-copy">
-    <h1 id="titulo">Compare antes<br class="market-hero-break"> de ir ao mercado.</h1>
-    <p>Pesquise preços e promoções{% if location %} nos supermercados de {{ location }}{% else %} na sua região{% endif %}.</p>
-    {% include 'pricing/storefront/search.html' %}
-    <div class="market-quick-search" aria-label="Exemplos de busca">
-      <span>Experimente</span>
-      <a href="{% url 'pricing:storefront_compare' %}?q=Caf%C3%A9+500+g{% if scope_query %}&amp;{{ scope_query }}{% endif %}">Café 500 g</a>
-      <a href="{% url 'pricing:storefront_compare' %}?q=Coca-Cola+2+L{% if scope_query %}&amp;{{ scope_query }}{% endif %}">Coca-Cola 2 L</a>
-      <a href="{% url 'pricing:storefront_compare' %}?q=Maionese+500+g{% if scope_query %}&amp;{{ scope_query }}{% endif %}">Maionese 500 g</a>
+<section class="market-search-page" aria-labelledby="titulo">
+  <h1 id="titulo">Pesquisar preços</h1>
+  <p class="market-search-description">Consulte os preços ao vivo nas quatro unidades.</p>
+  {% include 'pricing/storefront/search.html' %}
+</section>
+
+<section class="market-card market-recent" data-recent-searches hidden aria-labelledby="recentes-titulo">
+  <h2 id="recentes-titulo">Buscas recentes</h2>
+  <ul data-recent-list></ul>
+</section>
+
+{% if query %}
+<section class="market-results" aria-labelledby="resultados-titulo" aria-live="polite">
+  <div class="market-section-heading">
+    <div>
+      <h2 id="resultados-titulo">Resultados para {{ query }}</h2>
+      {% if matching_stores %}
+        <p>Encontramos preços em {{ matching_stores }} unidade{{ matching_stores|pluralize }}.</p>
+      {% else %}
+        <p>Não encontramos este produto nas unidades consultadas.</p>
+      {% endif %}
     </div>
+    {% if lowest_price %}<span class="market-tag market-tag-blue">Menor preço equivalente · R$ {{ lowest_price|floatformat:"2g" }}</span>{% endif %}
   </div>
-  <div class="market-hero-visual" aria-hidden="true">
-    <img src="{% static 'pricing/cesta-feira.webp' %}" width="1160" height="870" alt="" fetchpriority="high">
+
+  <div class="market-result-grid">
+    {% for group in groups %}
+    <article class="market-result-card" aria-labelledby="loja-{{ group.store.pk }}">
+      <header class="market-result-store">
+        {% include 'pricing/storefront/store_mark.html' with store=group.store only %}
+        <div><h3 id="loja-{{ group.store.pk }}">{{ group.store.get_retailer_display }}</h3><span>{{ group.store.unit }}</span></div>
+      </header>
+      <ul class="market-result-list">
+        {% for offer in group.offers %}
+        <li class="market-result-offer">
+          <div class="market-result-product">
+            <strong>{{ offer.name }}</strong>
+            {% if offer.is_multibuy %}
+              <span class="market-tag market-tag-multi">{{ offer.condition }}</span>
+            {% elif offer.is_promotion %}
+              <span class="market-tag market-tag-promo">Promoção</span>
+            {% elif offer.is_club %}
+              <span class="market-tag market-tag-blue">Preço de clube</span>
+            {% endif %}
+            {% if offer.club_price %}<span class="market-club-price">No clube R$ {{ offer.club_price|floatformat:"2g" }}</span>{% endif %}
+          </div>
+          <div class="market-result-price">
+            <strong>R$ {{ offer.price|floatformat:"2g" }}{% if offer.unit %}<small> / {{ offer.unit }}</small>{% endif %}</strong>
+            <span>{{ offer.availability }}</span>
+          </div>
+          <div class="market-result-meta">
+            <small>Consulta em {{ offer.observed_at|date:"d/m/Y" }} às {{ offer.observed_at|date:"H:i" }}</small>
+            <a href="{{ offer.url }}" aria-label="Ver {{ offer.name }} no {{ offer.store.get_retailer_display }}">Ver na loja</a>
+          </div>
+        </li>
+        {% empty %}
+        <li class="market-result-empty">{% if group.issue %}{{ group.issue }}{% else %}Produto não localizado nesta unidade.{% endif %}</li>
+        {% endfor %}
+      </ul>
+    </article>
+    {% endfor %}
   </div>
 </section>
+{% endif %}
 
-<section class="market-block" aria-labelledby="ofertas-titulo">
-  <div class="market-section-heading">
-    <div><h2 id="ofertas-titulo">Encontre ofertas atuais</h2><p>Pesquise um produto para consultar preços e condições diretamente nos mercados.</p></div>
-    <a class="market-outline-link" href="{% url 'pricing:storefront_promotions' %}{% if scope_query %}?{{ scope_query }}{% endif %}">Buscar promoções</a>
-  </div>
-  <div class="market-empty market-empty-inline">
-    <span class="market-tag market-tag-promo">Ao vivo</span>
-    <p>As ofertas aparecem nos resultados de cada produto pesquisado.</p>
-  </div>
-</section>
-
-<section class="market-block market-sources" aria-labelledby="mercados-titulo">
-  <div class="market-section-heading">
-    <div><h2 id="mercados-titulo">Mercados consultados</h2><p>Quatro unidades em Marília e região.</p></div>
-  </div>
-  {% if all_stores %}
-  <ul class="market-sources-list">
-    {% for store in all_stores %}
-    <li>{% include 'pricing/storefront/store_mark.html' with store=store only %}<div><strong>{{ store.get_retailer_display }}</strong><span>{{ store.unit }}</span></div></li>
+<section class="market-units" aria-labelledby="unidades-titulo">
+  <h2 id="unidades-titulo">Unidades consultadas</h2>
+  <ul class="market-unit-grid">
+    {% for store in stores %}
+    <li class="market-unit-card">
+      {% include 'pricing/storefront/store_mark.html' with store=store only %}
+      <div><strong>{{ store.get_retailer_display }}</strong><span>{{ store.unit }}</span></div>
+    </li>
     {% endfor %}
   </ul>
-  {% else %}
-  <p class="market-empty">Nenhum supermercado está disponível para consulta.</p>
-  {% endif %}
-</section>
-
-<section class="market-block market-recent" data-recent-searches hidden aria-labelledby="recentes-titulo">
-  <h2 id="recentes-titulo">Buscas recentes neste navegador</h2>
-  <ul data-recent-list></ul>
 </section>
 {% endblock %}

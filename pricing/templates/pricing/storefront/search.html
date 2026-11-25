@@ -1,12 +1,9 @@
-<form class="market-search" method="get" action="{% url search_action %}" aria-label="Buscar preços">
-  {% if city_key %}<input type="hidden" name="cidade" value="{{ city_key }}">{% endif %}
-  {% if store_options %}
-    {% for store in stores %}<input type="hidden" name="loja" value="{{ store.pk }}">{% endfor %}
-  {% endif %}
+<form class="market-search" method="get" action="{% url 'pricing:storefront' %}" aria-label="Pesquisar preços">
   <label class="market-search-field">
-    <span class="market-sr-only">Nome do produto</span>
+    <span class="market-sr-only">Nome, marca, embalagem ou código de barras</span>
     <svg aria-hidden="true" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="10.7" cy="10.7" r="6.6"/><path d="m16 16 4.5 4.5"/></svg>
-    <input type="search" name="q" value="{{ query|default:'' }}" placeholder="Ex.: café 500 g" maxlength="255" required>
+    <input type="search" name="q" value="{{ query|default:'' }}" placeholder="Nome, marca, embalagem ou código de barras" maxlength="255" autocomplete="off" required>
+    <kbd class="market-shortcut" aria-label="Atalho de teclado barra">/</kbd>
   </label>
-  <button type="submit">Buscar preços</button>
+  <button type="submit">Buscar</button>
 </form>

@@ -1,7 +1,7 @@
 (() => {
   const storageKey = "busca-preco:recent-searches:v1";
-  const url = new URL(window.location.href);
-  const query = url.searchParams.get("q")?.trim();
+  const currentUrl = new URL(window.location.href);
+  const query = currentUrl.searchParams.get("q")?.trim();
   let recent = [];
 
   try {
@@ -11,28 +11,35 @@
     recent = [];
   }
 
-  if (query && ["/comparar/", "/promocoes/"].includes(url.pathname)) {
+  if (query && currentUrl.pathname === "/") {
     recent = [query, ...recent.filter((item) => item.toLocaleLowerCase() !== query.toLocaleLowerCase())].slice(0, 5);
     try {
       window.localStorage.setItem(storageKey, JSON.stringify(recent));
     } catch {
-      // The search still works when browser storage is unavailable.
+      // A pesquisa continua funcionando quando o armazenamento do navegador está indisponível.
     }
   }
 
   const section = document.querySelector("[data-recent-searches]");
   const list = section?.querySelector("[data-recent-list]");
-  if (!section || !list || recent.length === 0) return;
-
-  const city = url.searchParams.get("cidade") || "todas";
-  for (const item of recent) {
-    const params = new URLSearchParams({ q: item, cidade: city });
-    const link = document.createElement("a");
-    link.href = `/comparar/?${params.toString()}`;
-    link.textContent = item;
-    const row = document.createElement("li");
-    row.append(link);
-    list.append(row);
+  if (section && list && recent.length) {
+    for (const item of recent) {
+      const link = document.createElement("a");
+      link.href = `/?${new URLSearchParams({ q: item }).toString()}`;
+      link.textContent = item;
+      const row = document.createElement("li");
+      row.append(link);
+      list.append(row);
+    }
+    section.hidden = false;
   }
-  section.hidden = false;
+
+  document.addEventListener("keydown", (event) => {
+    const input = document.querySelector('.market-search input[name="q"]');
+    if (event.key === "/" && !event.ctrlKey && !event.metaKey && !event.altKey
+        && !["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement?.tagName)) {
+      event.preventDefault();
+      input?.focus();
+    }
+  });
 })();
