@@ -1,6 +1,6 @@
 # busca-preço
 
-Busca pública de preços para a unidade Pompéia L02 e quatro supermercados concorrentes em Marília e região. A interface tem uma única tela de pesquisa; os resultados e as condições promocionais aparecem na mesma página, com os preços da Pompéia em destaque.
+Busca pública de preços para o Super Pompeia L02, na cidade de Pompéia, e quatro supermercados concorrentes em Marília e região. A interface tem uma única tela de pesquisa; os resultados e as condições promocionais aparecem na mesma página, com os preços do Super Pompeia em destaque.
 
 ## Estrutura
 

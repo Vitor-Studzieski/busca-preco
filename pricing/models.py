@@ -3,7 +3,7 @@ from django.db import models
 
 class Store(models.Model):
     class Retailer(models.TextChoices):
-        POMPEIA = "pompeia", "Pompéia"
+        POMPEIA = "pompeia", "Super Pompeia"
         LIDER = "lider", "Super Líder"
         TAUSTE = "tauste", "Tauste"
         CONFIANCA = "confianca", "Confiança"
